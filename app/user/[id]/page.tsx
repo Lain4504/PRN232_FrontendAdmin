@@ -67,8 +67,6 @@ export default function UserDetailPage() {
       try {
         // Fetch user details - use the paginated endpoint to get individual user
         const userResponse = await api.get(`${endpoints.userSearch}?search=${userId}&pageSize=1`);
-        console.log('User response:', userResponse);
-        console.log('User data:', userResponse.data);
         const userData = userResponse.data as any;
         const user = userData?.data?.[0]; // Get first user from paginated response
         if (user) {

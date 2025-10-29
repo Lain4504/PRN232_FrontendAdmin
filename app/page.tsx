@@ -234,26 +234,17 @@ export default function Dashboard() {
         const supabase = createClient();
         const { data: { session }, error } = await supabase.auth.getSession();
 
-        console.log('Session check:', session); // Debug log
-        console.log('Session error:', error); // Debug log
-
         if (!session) {
-          console.log('No session, redirecting to login'); // Debug log
           router.push('/auth/login');
           return;
         } else {
-          console.log('Session exists, checking user role'); // Debug log
-
           // Check user role from API
           try {
             const userResponse = await api.get(endpoints.userProfile);
             const userData = userResponse.data as any;
 
-            console.log('User data:', userData); // Debug log
-
             // Check if user has admin role (role = "Admin" or role = 2)
             if (userData.role !== "Admin" && userData.role !== 2) {
-              console.log('User is not admin, redirecting to login. Role:', userData.role); // Debug log
               toast.error('Access denied. Admin privileges required.');
               await supabase.auth.signOut();
               router.push('/auth/login');
@@ -335,10 +326,7 @@ export default function Dashboard() {
             return { data: [] };
           }),
         ]);
-        console.log('Users response:', usersResponse.data); // Debug log
-        console.log('Payments response:', paymentsResponse.data); // Debug log
-        console.log('Subscriptions response:', subscriptionsResponse.data); // Debug log
-
+        
         // Users API returns paginated data: { data: [...], totalCount: ..., ... }
         setUsers((usersResponse.data as any)?.data || []);
         // Payments and subscriptions APIs return direct arrays

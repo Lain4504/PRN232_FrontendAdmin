@@ -121,15 +121,4 @@ export const clearProfileContext = (): void => {
 // Debug helper
 export const debugProfileContext = () => {
   if (typeof window === 'undefined') return
-  
-  console.log('Profile Context Debug:', {
-    activeProfileId: getActiveProfileId(),
-    activeTeamId: getActiveTeamId(),
-    profileType: PROFILE_TYPE_LABELS[getProfileType()],
-    localStorage: {
-      activeProfileId: localStorage.getItem('activeProfileId'),
-      activeTeamId: localStorage.getItem('activeTeamId'),
-      profileType: localStorage.getItem('profileType')
-    }
-  })
 }

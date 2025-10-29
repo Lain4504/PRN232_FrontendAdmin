@@ -175,17 +175,12 @@ export const api = {
       ...(options?.headers || {}),
       ...authHeader,
     }
-
-    console.log('Sending multipart request to:', `${API_URL}${url}`)
-    console.log('Headers:', headers)
-
+    
     const response = await fetch(`${API_URL}${url}`, {
       method: 'POST',
       body: formData,
       headers,
     })
-
-    console.log('Response status:', response.status)
 
     if (!response.ok) {
       const errorText = await response.text()
