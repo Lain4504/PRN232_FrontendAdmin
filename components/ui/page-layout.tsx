@@ -105,13 +105,13 @@ const PageContent = React.forwardRef<HTMLDivElement, PageContentProps>(
 PageContent.displayName = "PageContent";
 
 // Page Section Component
-interface PageSectionProps extends React.HTMLAttributes<HTMLSectionElement> {
+interface PageSectionProps extends React.HTMLAttributes<HTMLElement> {
   children: React.ReactNode;
   title?: string;
   description?: string;
 }
 
-const PageSection = React.forwardRef<HTMLSectionElement, PageSectionProps>(
+const PageSection = React.forwardRef<HTMLElement, PageSectionProps>(
   ({ className, title, description, children, ...props }, ref) => {
     return (
       <section

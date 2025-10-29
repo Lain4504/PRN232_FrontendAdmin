@@ -3,16 +3,15 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
-import { api, endpoints, User } from "@/lib/api";
+import { api, endpoints, Subscription } from "@/lib/api";
 import { ColumnDef } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter as useNextRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import React from "react";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { Menu, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import React from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,19 +21,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { toast } from "sonner";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 
-const userColumns: ColumnDef<User>[] = [
+const subscriptionColumns: ColumnDef<Subscription>[] = [
+  {
+    accessorKey: "profileId",
+    header: "Profile Name",
+  },
   {
     accessorKey: "email",
     header: "Email",
+  },
+  {
+    accessorKey: "plan",
+    header: "Plan",
   },
   {
     accessorKey: "isActive",
@@ -44,37 +45,30 @@ const userColumns: ColumnDef<User>[] = [
     },
   },
   {
-    accessorKey: "socialAccountsCount",
-    header: "Social Accounts",
+    accessorKey: "quotaPostsPerMonth",
+    header: "Posts/Month",
   },
   {
-    accessorKey: "createdAt",
-    header: "Created At",
+    accessorKey: "startDate",
+    header: "Start Date",
     cell: ({ row }) => {
-      return new Date(row.getValue("createdAt")).toLocaleDateString();
+      return new Date(row.getValue("startDate")).toLocaleDateString();
     },
   },
   {
-    id: "actions",
+    accessorKey: "endDate",
+    header: "End Date",
     cell: ({ row }) => {
-      const router = useRouter();
-      return (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => router.push(`/user/${row.original.id}`)}
-        >
-          View Details
-        </Button>
-      );
+      const endDate = row.getValue("endDate") as string;
+      return endDate ? new Date(endDate).toLocaleDateString() : "N/A";
     },
   },
 ];
 
-const userColumnsMobile: ColumnDef<User>[] = [
+const subscriptionColumnsMobile: ColumnDef<Subscription>[] = [
   {
-    accessorKey: "email",
-    header: "Email",
+    accessorKey: "plan",
+    header: "Plan",
   },
   {
     accessorKey: "isActive",
@@ -84,35 +78,26 @@ const userColumnsMobile: ColumnDef<User>[] = [
     },
   },
   {
-    accessorKey: "socialAccountsCount",
-    header: "Accounts",
+    accessorKey: "quotaPostsPerMonth",
+    header: "Posts",
   },
   {
-    id: "actions",
+    accessorKey: "startDate",
+    header: "Started",
     cell: ({ row }) => {
-      const router = useRouter();
-      return (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => router.push(`/user/${row.original.id}`)}
-        >
-          View
-        </Button>
-      );
+      return new Date(row.getValue("startDate")).toLocaleDateString();
     },
   },
 ];
 
-
-export default function Dashboard() {
-  const [users, setUsers] = useState<User[]>([]);
+export default function SubscriptionsPage() {
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [sidebarMode, setSidebarMode] = React.useState<"expanded" | "collapsed" | "hover">("hover");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);
   const [user, setUser] = useState<any>(null);
-  const router = useNextRouter();
+  const router = useRouter();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -196,23 +181,22 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchSubscriptions = async () => {
       try {
-        const usersResponse = await api.get(endpoints.userSearch).catch(err => {
-          console.error('Users API error:', err);
+        const subscriptionsResponse = await api.get('/payment/subscriptions').catch(err => {
+          console.error('Subscriptions API error:', err);
           return { data: [] };
         });
 
-        // Users API returns paginated data: { data: [...], totalCount: ..., ... }
-        setUsers((usersResponse.data as any)?.data || []);
+        setSubscriptions((subscriptionsResponse.data as Subscription[]) || []);
       } catch (error) {
-        console.error("Failed to fetch users:", error);
+        console.error("Failed to fetch subscriptions:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUsers();
+    fetchSubscriptions();
   }, []);
 
   const handleLogout = async () => {
@@ -235,29 +219,6 @@ export default function Dashboard() {
     );
   }
 
-  const renderContent = () => {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Users</CardTitle>
-          <CardDescription>
-            Manage and view all registered users
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            columns={isMobile ? userColumnsMobile : userColumns}
-            data={users || []}
-            showSearch={true}
-            showPageSize={true}
-            pageSize={isMobile ? 5 : 10}
-            className={isMobile ? "text-sm [&_[data-search-input]]:w-full [&_[data-page-size]]:w-full" : ""}
-          />
-        </CardContent>
-      </Card>
-    );
-  };
-
   return (
     <div className="h-screen w-full overflow-hidden">
       <div className="flex h-full w-full max-w-full">
@@ -279,7 +240,24 @@ export default function Dashboard() {
         )}>
           <main className="flex-1 overflow-x-hidden max-w-full">
             <div className="flex flex-1 flex-col gap-4 p-4">
-              {renderContent()}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Subscriptions</CardTitle>
+                  <CardDescription>
+                    Manage user subscriptions and plans
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <DataTable
+                    columns={isMobile ? subscriptionColumnsMobile : subscriptionColumns}
+                    data={subscriptions || []}
+                    showSearch={true}
+                    showPageSize={true}
+                    pageSize={isMobile ? 5 : 10}
+                    className={isMobile ? "text-sm" : ""}
+                  />
+                </CardContent>
+              </Card>
             </div>
           </main>
         </div>

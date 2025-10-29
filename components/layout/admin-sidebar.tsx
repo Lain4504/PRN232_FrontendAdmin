@@ -149,59 +149,56 @@ export function AdminSidebar({ onSectionChange }: { onSectionChange?: (section: 
                 {mainNavItems.map((item) => (
                     <Tooltip key={item.title}>
                       <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          className={cn(
-                            "relative w-full h-8 lg:h-8 px-2",
-                            sidebarModeState === 'expanded' && "justify-start",
-                            sidebarModeState === 'collapsed' && "lg:justify-center",
-                            sidebarModeState === 'hover' && "lg:justify-center lg:group-hover:justify-start",
-                            pathname === item.url && "bg-accent"
-                          )}
-                          onClick={() => {
-                            if (item.section && onSectionChange) {
-                              onSectionChange(item.section);
-                            }
-                          }}
-                        >
-                          <item.icon className={cn(
-                            "size-4",
-                            sidebarModeState === 'expanded' && "mr-2",
-                            sidebarModeState === 'hover' && "lg:mr-0 lg:group-hover:mr-2"
-                          )} />
-                          <span className={cn(
-                            "transition-opacity duration-300 whitespace-nowrap",
-                            sidebarModeState === 'expanded' && "inline",
-                            sidebarModeState === 'collapsed' && "hidden",
-                            sidebarModeState === 'hover' && "hidden lg:group-hover:inline"
-                          )}>
-                            {item.title}
-                          </span>
-                          {item.badge && (
-                            <>
-                              {sidebarModeState === 'collapsed' && (
-                                <span className="absolute right-0 top-1 hidden lg:inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] leading-none text-white">
-                                  {item.badge}
-                                </span>
-                              )}
-                              {sidebarModeState === 'hover' && (
-                                <>
-                                  <span className="absolute right-0 top-1 hidden lg:inline-flex lg:group-hover:hidden h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] leading-none text-white">
+                        <Link href={item.url}>
+                          <Button
+                            variant="ghost"
+                            className={cn(
+                              "relative w-full h-8 lg:h-8 px-2",
+                              sidebarModeState === 'expanded' && "justify-start",
+                              sidebarModeState === 'collapsed' && "lg:justify-center",
+                              sidebarModeState === 'hover' && "lg:justify-center lg:group-hover:justify-start",
+                              pathname === item.url && "bg-accent"
+                            )}
+                          >
+                            <item.icon className={cn(
+                              "size-4",
+                              sidebarModeState === 'expanded' && "mr-2",
+                              sidebarModeState === 'hover' && "lg:mr-0 lg:group-hover:mr-2"
+                            )} />
+                            <span className={cn(
+                              "transition-opacity duration-300 whitespace-nowrap",
+                              sidebarModeState === 'expanded' && "inline",
+                              sidebarModeState === 'collapsed' && "hidden",
+                              sidebarModeState === 'hover' && "hidden lg:group-hover:inline"
+                            )}>
+                              {item.title}
+                            </span>
+                            {item.badge && (
+                              <>
+                                {sidebarModeState === 'collapsed' && (
+                                  <span className="absolute right-0 top-1 hidden lg:inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] leading-none text-white">
                                     {item.badge}
                                   </span>
-                                  <span className="ml-auto hidden lg:group-hover:flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                                )}
+                                {sidebarModeState === 'hover' && (
+                                  <>
+                                    <span className="absolute right-0 top-1 hidden lg:inline-flex lg:group-hover:hidden h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] leading-none text-white">
+                                      {item.badge}
+                                    </span>
+                                    <span className="ml-auto hidden lg:group-hover:flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                                      {item.badge}
+                                    </span>
+                                  </>
+                                )}
+                                {sidebarModeState === 'expanded' && (
+                                  <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
                                     {item.badge}
                                   </span>
-                                </>
-                              )}
-                              {sidebarModeState === 'expanded' && (
-                                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-                                  {item.badge}
-                                </span>
-                              )}
-                            </>
-                          )}
-                        </Button>
+                                )}
+                              </>
+                            )}
+                          </Button>
+                          </Link>
                       </TooltipTrigger>
                       <TooltipContent side="right" className={cn("lg:block hidden", sidebarModeState === 'expanded' && "hidden")}>
                         <p>{item.title}</p>

@@ -413,6 +413,10 @@ export const endpoints = {
     byContent: (contentId: string) => `/posts/content/${contentId}`,
     byIntegration: (integrationId: string) => `/posts/integration/${integrationId}`,
   },
+
+  // Teams endpoints
+  teams: () => '/teams',
+  userTeams: () => '/team/user-teams',
 }
 
 // Legacy API service for backward compatibility

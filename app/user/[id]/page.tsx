@@ -5,10 +5,13 @@ import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, CreditCard } from "lucide-react";
+import { ArrowLeft, User, CreditCard, Building, Share2, Users, Eye } from "lucide-react";
 import { api, endpoints, Profile, Subscription } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { DataTable } from "@/components/ui/data-table";
+import { ColumnDef } from "@tanstack/react-table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface UserDetail {
   id: string;
@@ -19,15 +22,169 @@ interface UserDetail {
   socialAccountsCount: number;
 }
 
+interface CombinedProfileSubscription {
+  profileId: string;
+  profileName: string;
+  profileType: string;
+  profileStatus: string;
+  plan: string;
+  isActive: boolean;
+  quotaPostsPerMonth: number;
+  startDate: string;
+  endDate?: string;
+}
+
+interface Brand {
+  id: string;
+  name: string;
+  description?: string;
+  status: string;
+  createdAt: string;
+}
+
+interface SocialAccount {
+  id: string;
+  platform: string;
+  username: string;
+  status: string;
+  createdAt: string;
+}
+
+interface Team {
+  id: string;
+  name: string;
+  description?: string;
+  status: string;
+  createdAt: string;
+  memberCount: number;
+}
+
+interface ProfileDetailsModalProps {
+  profile: Profile;
+  subscriptions: Subscription[];
+  brands: Brand[];
+  socialAccounts: SocialAccount[];
+  teams: Team[];
+}
+
+function ProfileDetailsModal({ profile, subscriptions, brands, socialAccounts, teams }: ProfileDetailsModalProps) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Eye className="h-4 w-4 mr-2" />
+          View Details
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Profile Details: {profile.name}
+          </DialogTitle>
+          <DialogDescription>
+            Complete information for this profile including subscription, brands, social accounts, and teams.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-6 mt-4">
+          {/* Profile Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Profile Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Name</p>
+                  <p>{profile.name}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Type</p>
+                  <p>{profile.profileType}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Status</p>
+                  <Badge variant={profile.status === "Active" ? "default" : "secondary"}>
+                    {profile.status}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Company</p>
+                  <p>{profile.companyName || "N/A"}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-sm font-medium text-muted-foreground">Bio</p>
+                  <p>{profile.bio || "No bio available"}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function UserDetailPage() {
   const params = useParams();
   const router = useRouter();
   const userId = params.id as string;
 
+  const createProfileColumns = (currentUserId: string): ColumnDef<Profile>[] => [
+    {
+      accessorKey: "name",
+      header: "Profile Name",
+    },
+    {
+      accessorKey: "profileType",
+      header: "Type",
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        return <Badge variant={row.getValue("status") === "Active" ? "default" : "secondary"}>
+          {row.getValue("status")}
+        </Badge>;
+      },
+    },
+    {
+      accessorKey: "companyName",
+      header: "Company",
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Created At",
+      cell: ({ row }) => {
+        return new Date(row.getValue("createdAt")).toLocaleDateString();
+      },
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const profile = row.original;
+        return (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.location.href = `/user/${currentUserId}/profile/${profile.id}`}
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            View Details
+          </Button>
+        );
+      },
+    },
+  ];
+
   const [user, setUser] = useState<UserDetail | null>(null);
   const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+  const [, setSubscriptions] = useState<Subscription[]>([]);
+  const [, setCombinedData] = useState<CombinedProfileSubscription[]>([]);
+  const [, setBrands] = useState<Brand[]>([]);
+  const [, setSocialAccounts] = useState<SocialAccount[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,7 +193,7 @@ export default function UserDetailPage() {
         const supabase = createClient();
         const { data: { session } } = await supabase.auth.getSession();
 
-        if (!session) {
+        if (!session || !session.access_token) {
           router.push('/auth/login');
           return;
         }
@@ -65,10 +222,12 @@ export default function UserDetailPage() {
       if (!userId) return;
 
       try {
-        // Fetch user details - use the paginated endpoint to get individual user
-        const userResponse = await api.get(`${endpoints.userSearch}?search=${userId}&pageSize=1`);
+        // Fetch user details - use the search endpoint and find exact match
+        const userResponse = await api.get(`${endpoints.userSearch}?search=${userId}&pageSize=10`);
         const userData = userResponse.data as any;
-        const user = userData?.data?.[0]; // Get first user from paginated response
+        const users = userData?.data || [];
+        // Find exact match by email or ID
+        const user = users.find((u: any) => u.email === userId || u.id === userId);
         if (user) {
           setUser(user);
         } else {
@@ -86,16 +245,59 @@ export default function UserDetailPage() {
         ) || [];
         setSubscriptions(userSubscriptions);
 
+        // Fetch user brands - skip for now as it requires specific permissions
+        setBrands([]);
+
+        // Fetch user social accounts
+        try {
+          const socialAccountsResponse = await api.get(endpoints.socialAccountsUser(userId));
+          setSocialAccounts((socialAccountsResponse.data as SocialAccount[]) || []);
+        } catch (error) {
+          console.error("Failed to fetch social accounts:", error);
+          setSocialAccounts([]);
+        }
+
+        // Fetch user teams
+        try {
+          const teamsResponse = await api.get(endpoints.userTeams());
+          setTeams((teamsResponse.data as Team[]) || []);
+        } catch (error) {
+          console.error("Failed to fetch teams:", error);
+          setTeams([]);
+        }
+
+        // Combine profiles and subscriptions data
+        const combined = (profilesResponse.data as Profile[]).map(profile => {
+          const subscription = userSubscriptions.find(sub => sub.profileId === profile.id);
+          return {
+            profileId: profile.id,
+            profileName: profile.name,
+            profileType: profile.profileType,
+            profileStatus: profile.status,
+            plan: subscription?.plan || 'No Plan',
+            isActive: subscription?.isActive || false,
+            quotaPostsPerMonth: subscription?.quotaPostsPerMonth || 0,
+            startDate: subscription?.startDate || '',
+            endDate: subscription?.endDate,
+          };
+        });
+        setCombinedData(combined);
+
       } catch (error) {
         console.error("Failed to fetch user data:", error);
-        toast.error("Failed to load user data");
+        if (error instanceof Error && error.message.includes('HTTP 401')) {
+          toast.error("Authentication failed. Please log in again.");
+          router.push('/auth/login');
+        } else {
+          toast.error("Failed to load user data");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchUserData();
-  }, [userId]);
+  }, [userId, router]);
 
   if (loading) {
     return (
@@ -171,136 +373,31 @@ export default function UserDetailPage() {
 
         {/* Main Content */}
         <div className="space-y-6">
-          {/* Desktop: Two column layout, Mobile: Single column */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Profiles List */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Profiles ({profiles.length})
-                </CardTitle>
-                <CardDescription className="hidden sm:block">
-                  Click on a profile to view its subscription details
-                </CardDescription>
-                <CardDescription className="sm:hidden">
-                  Tap a profile to view subscription details
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {profiles.length === 0 ? (
-                  <p className="text-muted-foreground">No profiles found for this user.</p>
-                ) : (
-                  <div className="space-y-3">
-                    {profiles.map((profile) => (
-                      <Card
-                        key={profile.id}
-                        className={`cursor-pointer transition-all hover:shadow-md active:scale-95 ${
-                          selectedProfile?.id === profile.id ? 'ring-2 ring-primary shadow-md' : ''
-                        }`}
-                        onClick={() => setSelectedProfile(profile)}
-                      >
-                        <CardContent className="p-3 sm:p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="min-w-0 flex-1">
-                              <h4 className="font-medium truncate">{profile.name}</h4>
-                              <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                                {profile.profileType} • {profile.status}
-                              </p>
-                            </div>
-                            <Badge variant="outline" className="ml-2 text-xs">
-                              {profile.status}
-                            </Badge>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Subscription Details */}
-            <Card className={`${selectedProfile ? 'block' : 'hidden'}`}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  Subscription Details
-                </CardTitle>
-                <CardDescription>
-                  {selectedProfile ? `Subscription for ${selectedProfile.name}` : 'Select a profile to view subscription details'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {selectedProfile ? (
-                  (() => {
-                    const profileSubscription = subscriptions.find(sub => sub.profileId === selectedProfile.id);
-                    return profileSubscription ? (
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Plan</p>
-                            <p className="text-lg font-semibold">{profileSubscription.plan}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Status</p>
-                            <Badge variant={profileSubscription.isActive ? "default" : "secondary"} className="mt-1">
-                              {profileSubscription.isActive ? "Active" : "Inactive"}
-                            </Badge>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Posts/Month</p>
-                            <p className="text-lg font-semibold">{profileSubscription.quotaPostsPerMonth}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">Start Date</p>
-                            <p className="text-sm">{new Date(profileSubscription.startDate).toLocaleDateString()}</p>
-                          </div>
-                        </div>
-
-                        {profileSubscription.endDate && (
-                          <div className="sm:col-span-2">
-                            <p className="text-sm font-medium text-muted-foreground">End Date</p>
-                            <p className="text-sm">{new Date(profileSubscription.endDate).toLocaleDateString()}</p>
-                          </div>
-                        )}
-
-                        <div className="pt-4 border-t">
-                          <h4 className="font-medium mb-2">Profile Information</h4>
-                          <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Profile Type:</span>
-                              <span className="text-right">{selectedProfile.profileType}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Created:</span>
-                              <span className="text-right">{new Date(selectedProfile.createdAt).toLocaleDateString()}</span>
-                            </div>
-                            {selectedProfile.companyName && (
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Company:</span>
-                                <span className="text-right">{selectedProfile.companyName}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">No subscription found for this profile.</p>
-                      </div>
-                    );
-                  })()
-                ) : (
-                  <div className="text-center py-8">
-                    <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">Select a profile from the list to view subscription details.</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+          {/* Profiles Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Profiles ({profiles.length})
+              </CardTitle>
+              <CardDescription>
+                User profiles with detailed information available
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {profiles.length === 0 ? (
+                <p className="text-muted-foreground">No profiles found for this user.</p>
+              ) : (
+                <DataTable
+                  columns={createProfileColumns(userId)}
+                  data={profiles}
+                  showSearch={true}
+                  showPageSize={true}
+                  pageSize={10}
+                />
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

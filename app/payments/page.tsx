@@ -3,16 +3,15 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
-import { api, endpoints, User } from "@/lib/api";
+import { api, endpoints, Payment } from "@/lib/api";
 import { ColumnDef } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter as useNextRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import React from "react";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { Menu, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import React from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,30 +21,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { toast } from "sonner";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 
-const userColumns: ColumnDef<User>[] = [
+const paymentColumns: ColumnDef<Payment>[] = [
   {
-    accessorKey: "email",
-    header: "Email",
+    accessorKey: "userId",
+    header: "User ID",
   },
   {
-    accessorKey: "isActive",
-    header: "Status",
+    accessorKey: "amount",
+    header: "Amount",
     cell: ({ row }) => {
-      return row.getValue("isActive") ? "Active" : "Inactive";
+      return `$${row.getValue("amount")}`;
     },
   },
   {
-    accessorKey: "socialAccountsCount",
-    header: "Social Accounts",
+    accessorKey: "currency",
+    header: "Currency",
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
   },
   {
     accessorKey: "createdAt",
@@ -54,65 +51,37 @@ const userColumns: ColumnDef<User>[] = [
       return new Date(row.getValue("createdAt")).toLocaleDateString();
     },
   },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const router = useRouter();
-      return (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => router.push(`/user/${row.original.id}`)}
-        >
-          View Details
-        </Button>
-      );
-    },
-  },
 ];
 
-const userColumnsMobile: ColumnDef<User>[] = [
+const paymentColumnsMobile: ColumnDef<Payment>[] = [
   {
-    accessorKey: "email",
-    header: "Email",
+    accessorKey: "amount",
+    header: "Amount",
+    cell: ({ row }) => {
+      return `$${row.getValue("amount")}`;
+    },
   },
   {
-    accessorKey: "isActive",
+    accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => {
-      return row.getValue("isActive") ? "Active" : "Inactive";
-    },
   },
   {
-    accessorKey: "socialAccountsCount",
-    header: "Accounts",
-  },
-  {
-    id: "actions",
+    accessorKey: "createdAt",
+    header: "Date",
     cell: ({ row }) => {
-      const router = useRouter();
-      return (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => router.push(`/user/${row.original.id}`)}
-        >
-          View
-        </Button>
-      );
+      return new Date(row.getValue("createdAt")).toLocaleDateString();
     },
   },
 ];
 
-
-export default function Dashboard() {
-  const [users, setUsers] = useState<User[]>([]);
+export default function PaymentsPage() {
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [sidebarMode, setSidebarMode] = React.useState<"expanded" | "collapsed" | "hover">("hover");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);
   const [user, setUser] = useState<any>(null);
-  const router = useNextRouter();
+  const router = useRouter();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -196,23 +165,22 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchPayments = async () => {
       try {
-        const usersResponse = await api.get(endpoints.userSearch).catch(err => {
-          console.error('Users API error:', err);
+        const paymentsResponse = await api.get('/payment/payments').catch(err => {
+          console.error('Payments API error:', err);
           return { data: [] };
         });
 
-        // Users API returns paginated data: { data: [...], totalCount: ..., ... }
-        setUsers((usersResponse.data as any)?.data || []);
+        setPayments((paymentsResponse.data as Payment[]) || []);
       } catch (error) {
-        console.error("Failed to fetch users:", error);
+        console.error("Failed to fetch payments:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUsers();
+    fetchPayments();
   }, []);
 
   const handleLogout = async () => {
@@ -235,29 +203,6 @@ export default function Dashboard() {
     );
   }
 
-  const renderContent = () => {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Users</CardTitle>
-          <CardDescription>
-            Manage and view all registered users
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            columns={isMobile ? userColumnsMobile : userColumns}
-            data={users || []}
-            showSearch={true}
-            showPageSize={true}
-            pageSize={isMobile ? 5 : 10}
-            className={isMobile ? "text-sm [&_[data-search-input]]:w-full [&_[data-page-size]]:w-full" : ""}
-          />
-        </CardContent>
-      </Card>
-    );
-  };
-
   return (
     <div className="h-screen w-full overflow-hidden">
       <div className="flex h-full w-full max-w-full">
@@ -279,7 +224,24 @@ export default function Dashboard() {
         )}>
           <main className="flex-1 overflow-x-hidden max-w-full">
             <div className="flex flex-1 flex-col gap-4 p-4">
-              {renderContent()}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Payments</CardTitle>
+                  <CardDescription>
+                    View all payment transactions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <DataTable
+                    columns={isMobile ? paymentColumnsMobile : paymentColumns}
+                    data={payments || []}
+                    showSearch={true}
+                    showPageSize={true}
+                    pageSize={isMobile ? 5 : 10}
+                    className={isMobile ? "text-sm" : ""}
+                  />
+                </CardContent>
+              </Card>
             </div>
           </main>
         </div>
