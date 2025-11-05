@@ -229,7 +229,17 @@ export const api = {
 export const endpoints = {
   // User endpoints
   userProfile: "/users/profile/me",
-  userSearch: "/users",
+  userSearch: (params?: { page?: number; pageSize?: number; searchTerm?: string; sortBy?: string; sortDescending?: boolean }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.pageSize) searchParams.append('pageSize', params.pageSize.toString());
+    if (params?.searchTerm) searchParams.append('searchTerm', params.searchTerm);
+    if (params?.sortBy) searchParams.append('sortBy', params.sortBy);
+    if (params?.sortDescending !== undefined) searchParams.append('sortDescending', params.sortDescending.toString());
+    const queryString = searchParams.toString() ? `?${searchParams.toString()}` : '';
+    return `/users${queryString}`;
+  },
+  userById: (userId: string) => `/users/${userId}`,
 
   // Social Auth endpoints
   socialAuth: (provider: string) => `/social-auth/${provider}`,
@@ -417,24 +427,36 @@ export const endpoints = {
   // Teams endpoints
   teams: () => '/teams',
   userTeams: () => '/team/user-teams',
+
+  // Admin endpoints
+  // Payment endpoints
+  paymentsHistory: () => '/payment/history',
+  paymentsAll: () => '/payment/admin/all',
+  userPayments: (userId: string) => `/payment/admin/user/${userId}/payments`,
+  
+  // Subscription endpoints
+  subscriptions: () => '/payment/subscriptions',
+  subscriptionsAll: () => '/payment/admin/subscriptions',
+  userSubscriptions: (userId: string) => `/payment/admin/user/${userId}/subscriptions`,
 }
 
-// Legacy API service for backward compatibility
+// User types matching backend DTOs
 export interface User {
   id: string;
   email: string;
   createdAt: string;
-  isActive: boolean;
   socialAccountsCount: number;
+  role?: string; // Added for admin checks
 }
 
 export interface Payment {
   id: string;
   userId: string;
+  userEmail?: string;
   subscriptionId?: string;
   amount: number;
   currency: string;
-  status: string;
+  status: string | number;
   paymentMethod?: string;
   transactionId?: string;
   invoiceUrl?: string;

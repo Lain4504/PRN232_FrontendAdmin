@@ -48,8 +48,26 @@ export function LoginForm({
         throw new Error(error.message);
       }
 
-      toast.success("Welcome back!");
-      router.push("/");
+      // Check if user is admin after successful login
+      try {
+        const { api } = await import("@/lib/api");
+        const { endpoints } = await import("@/lib/api");
+        const userResponse = await api.get(endpoints.userProfile);
+        const userData = userResponse.data as any;
+        const hasAdminRole = userData.role === "Admin" || userData.role === 2 || userData.role === "2";
+        
+        if (hasAdminRole) {
+          toast.success("Welcome back!");
+          router.push("/");
+        } else {
+          toast.error("Access denied. Admin privileges required.");
+          await supabase.auth.signOut();
+        }
+      } catch (roleError) {
+        console.error('Role check error:', roleError);
+        toast.error("Failed to verify admin privileges.");
+        await supabase.auth.signOut();
+      }
     } catch (error: unknown) {
       const authError: AuthError = {
         message: error instanceof Error ? error.message : "An unexpected error occurred",

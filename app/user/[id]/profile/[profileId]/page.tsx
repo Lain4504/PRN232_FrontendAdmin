@@ -12,6 +12,35 @@ import { toast } from "sonner";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 
+// Mapping functions for profileType and status
+const mapProfileType = (type: number | string): string => {
+  if (typeof type === 'string') return type;
+  const typeMap: Record<number, string> = {
+    0: 'Free',
+    1: 'Basic',
+    2: 'Pro'
+  };
+  return typeMap[type] || 'Unknown';
+};
+
+const mapProfileStatus = (status: number | string): string => {
+  if (typeof status === 'string') return status;
+  const statusMap: Record<number, string> = {
+    0: 'Pending',
+    1: 'Active',
+    2: 'Suspended',
+    3: 'Cancelled'
+  };
+  return statusMap[status] || 'Unknown';
+};
+
+// Helper to format platform name
+const formatPlatformName = (platform: string): string => {
+  if (!platform) return 'Unknown';
+  // Capitalize first letter
+  return platform.charAt(0).toUpperCase() + platform.slice(1).toLowerCase();
+};
+
 interface Brand {
   id: string;
   name: string;
@@ -172,7 +201,13 @@ export default function ProfileDetailPage() {
       try {
         // Fetch profile details
         const profilesResponse = await api.get(endpoints.profilesByUser(userId));
-        const userProfiles = (profilesResponse.data as Profile[]) || [];
+        const userProfilesData = (profilesResponse.data as any[]) || [];
+        // Map profileType and status from numbers to strings
+        const userProfiles = userProfilesData.map((profile: any) => ({
+          ...profile,
+          profileType: mapProfileType(profile.profileType),
+          status: mapProfileStatus(profile.status)
+        }));
         const currentProfile = userProfiles.find(p => p.id === profileId);
 
         if (!currentProfile) {
@@ -188,13 +223,60 @@ export default function ProfileDetailPage() {
         ) || [];
         setSubscription(userSubscriptions[0] || null);
 
-        // Fetch user brands - skip for now as it requires specific permissions
-        setBrands([]);
-
-        // Fetch user social accounts
+        // Fetch user brands - API needs X-Profile-Id header
         try {
-          const socialAccountsResponse = await api.get(endpoints.socialAccountsUser(userId));
-          setSocialAccounts((socialAccountsResponse.data as SocialAccount[]) || []);
+          // Temporarily set profileId in localStorage for API context
+          const originalProfileId = typeof window !== 'undefined' ? localStorage.getItem('activeProfileId') : null;
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('activeProfileId', profileId);
+          }
+
+          try {
+            // Set profileId in localStorage so API context headers will use it
+            const brandsResponse = await api.get(endpoints.brands());
+            
+            // API returns PagedResult<BrandResponseDto>
+            const brandsData = brandsResponse.data as any;
+            const brandsList = brandsData?.data || brandsData || [];
+            
+            // Map backend response to frontend format
+            const mappedBrands: Brand[] = brandsList.map((brand: any) => ({
+              id: brand.id,
+              name: brand.name || 'Unnamed Brand',
+              description: brand.description || '',
+              status: brand.isDeleted ? 'Deleted' : 'Active',
+              createdAt: brand.createdAt || new Date().toISOString()
+            }));
+            
+            setBrands(mappedBrands);
+          } finally {
+            // Restore original profileId
+            if (typeof window !== 'undefined') {
+              if (originalProfileId) {
+                localStorage.setItem('activeProfileId', originalProfileId);
+              } else {
+                localStorage.removeItem('activeProfileId');
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch brands:", error);
+          setBrands([]);
+        }
+
+        // Fetch user social accounts - API expects profileId, not userId
+        try {
+          const socialAccountsResponse = await api.get(endpoints.socialAccountsUser(profileId));
+          const socialAccountsData = (socialAccountsResponse.data as any[]) || [];
+          // Map backend response to frontend format
+          const mappedSocialAccounts: SocialAccount[] = socialAccountsData.map((account: any) => ({
+            id: account.id,
+            platform: formatPlatformName(account.provider || account.platform || 'Unknown'),
+            username: account.providerUserId || account.username || 'N/A',
+            status: account.isActive ? 'Active' : 'Inactive',
+            createdAt: account.createdAt || new Date().toISOString()
+          }));
+          setSocialAccounts(mappedSocialAccounts);
         } catch (error) {
           console.error("Failed to fetch social accounts:", error);
           setSocialAccounts([]);
@@ -263,6 +345,52 @@ export default function ProfileDetailPage() {
 
         {/* Main Content */}
         <div className="space-y-6">
+          {/* Profile Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Profile Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Name</p>
+                  <p>{profile.name}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Type</p>
+                  <Badge variant={profile.profileType === "Pro" ? "default" : profile.profileType === "Basic" ? "secondary" : "outline"}>
+                    {profile.profileType}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Status</p>
+                  <Badge variant={profile.status === "Active" ? "default" : "secondary"}>
+                    {profile.status}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Company</p>
+                  <p>{profile.companyName || "N/A"}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-sm font-medium text-muted-foreground">Bio</p>
+                  <p>{profile.bio || "No bio available"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Created At</p>
+                  <p>{new Date(profile.createdAt).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Updated At</p>
+                  <p>{new Date(profile.updatedAt).toLocaleDateString()}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Subscription Info */}
           <Card>
             <CardHeader>

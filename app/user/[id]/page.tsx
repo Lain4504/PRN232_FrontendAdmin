@@ -9,16 +9,38 @@ import { ArrowLeft, User, CreditCard, Building, Share2, Users, Eye } from "lucid
 import { api, endpoints, Profile, Subscription } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+
+// Mapping functions for profileType and status
+const mapProfileType = (type: number | string): string => {
+  if (typeof type === 'string') return type;
+  const typeMap: Record<number, string> = {
+    0: 'Free',
+    1: 'Basic',
+    2: 'Pro'
+  };
+  return typeMap[type] || 'Unknown';
+};
+
+const mapProfileStatus = (status: number | string): string => {
+  if (typeof status === 'string') return status;
+  const statusMap: Record<number, string> = {
+    0: 'Pending',
+    1: 'Active',
+    2: 'Suspended',
+    3: 'Cancelled'
+  };
+  return statusMap[status] || 'Unknown';
+};
 
 interface UserDetail {
   id: string;
   email: string;
   role: string;
   createdAt: string;
-  isActive: boolean;
   socialAccountsCount: number;
 }
 
@@ -100,7 +122,9 @@ function ProfileDetailsModal({ profile, subscriptions, brands, socialAccounts, t
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Type</p>
-                  <p>{profile.profileType}</p>
+                  <Badge variant={profile.profileType === "Pro" ? "default" : profile.profileType === "Basic" ? "secondary" : "outline"}>
+                    {profile.profileType}
+                  </Badge>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Status</p>
@@ -138,6 +162,12 @@ export default function UserDetailPage() {
     {
       accessorKey: "profileType",
       header: "Type",
+      cell: ({ row }) => {
+        const profileType = row.getValue("profileType") as string;
+        return <Badge variant={profileType === "Pro" ? "default" : profileType === "Basic" ? "secondary" : "outline"}>
+          {profileType}
+        </Badge>;
+      },
     },
     {
       accessorKey: "status",
@@ -187,63 +217,64 @@ export default function UserDetailPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
-
-        if (!session || !session.access_token) {
-          router.push('/auth/login');
-          return;
-        }
-
-        // Check admin role
-        const userResponse = await api.get(endpoints.userProfile);
-        const userData = userResponse.data as any;
-
-        if (userData.role !== "Admin" && userData.role !== 2) {
-          toast.error('Access denied. Admin privileges required.');
-          await supabase.auth.signOut();
-          router.push('/auth/login');
-          return;
-        }
-      } catch (err) {
-        console.error('Auth check error:', err);
-        router.push('/auth/login');
-      }
-    };
-
-    checkAuth();
-  }, [router]);
+  const { isLoading: authLoading, isAdmin } = useAdminAuth();
 
   useEffect(() => {
+    if (authLoading || !isAdmin) return;
+    if (!userId) return;
+
     const fetchUserData = async () => {
-      if (!userId) return;
-
       try {
-        // Fetch user details - use the search endpoint and find exact match
-        const userResponse = await api.get(`${endpoints.userSearch}?search=${userId}&pageSize=10`);
+        // Fetch user details - use the search endpoint with proper params
+        const userResponse = await api.get(endpoints.userSearch({ 
+          searchTerm: userId, 
+          pageSize: 100 
+        })).catch(err => {
+          console.error('User search error:', err);
+          return { data: { data: [] } };
+        });
+        
         const userData = userResponse.data as any;
+        // API returns GenericResponse<PagedResult<UserListDto>>
         const users = userData?.data || [];
         // Find exact match by email or ID
-        const user = users.find((u: any) => u.email === userId || u.id === userId);
-        if (user) {
-          setUser(user);
+        const foundUser = users.find((u: any) => u.email === userId || u.id === userId);
+        if (foundUser) {
+          setUser(foundUser);
         } else {
-          throw new Error('User not found');
+          // Try to get user by ID directly (if backend supports it)
+          try {
+            const directUserResponse = await api.get(endpoints.userById(userId));
+            const directUserData = directUserResponse.data as any;
+            setUser(directUserData);
+          } catch {
+            throw new Error('User not found');
+          }
         }
 
         // Fetch user profiles
-        const profilesResponse = await api.get(endpoints.profilesByUser(userId));
-        setProfiles((profilesResponse.data as Profile[]) || []);
+        const profilesResponse = await api.get(endpoints.profilesByUser(userId)).catch(err => {
+          console.error('Profiles fetch error:', err);
+          return { data: [] };
+        });
+        // API returns GenericResponse<IEnumerable<ProfileResponseDto>>
+        const profilesData = profilesResponse.data as any;
+        // Map profileType and status from numbers to strings
+        const mappedProfiles = (profilesData || []).map((profile: any) => ({
+          ...profile,
+          profileType: mapProfileType(profile.profileType),
+          status: mapProfileStatus(profile.status)
+        }));
+        setProfiles(mappedProfiles);
 
-        // Fetch user subscriptions
-        const subscriptionsResponse = await api.get('/payment/subscriptions');
-        const userSubscriptions = (subscriptionsResponse.data as Subscription[])?.filter(
-          sub => (profilesResponse.data as Profile[])?.some((profile: Profile) => profile.id === sub.profileId)
-        ) || [];
-        setSubscriptions(userSubscriptions);
+        // Fetch user subscriptions using admin endpoint
+        const subscriptionsResponse = await api.get(endpoints.userSubscriptions(userId)).catch(err => {
+          console.error('Subscriptions fetch error:', err);
+          return { data: [] };
+        });
+        // API returns GenericResponse<IEnumerable<SubscriptionResponseDto>>
+        const subscriptionsData = subscriptionsResponse.data as any;
+        setSubscriptions(subscriptionsData || []);
 
         // Fetch user brands - skip for now as it requires specific permissions
         setBrands([]);
@@ -251,7 +282,9 @@ export default function UserDetailPage() {
         // Fetch user social accounts
         try {
           const socialAccountsResponse = await api.get(endpoints.socialAccountsUser(userId));
-          setSocialAccounts((socialAccountsResponse.data as SocialAccount[]) || []);
+          // API returns GenericResponse<IEnumerable<SocialAccountResponseDto>>
+          const socialAccountsData = socialAccountsResponse.data as any;
+          setSocialAccounts(socialAccountsData || []);
         } catch (error) {
           console.error("Failed to fetch social accounts:", error);
           setSocialAccounts([]);
@@ -260,15 +293,17 @@ export default function UserDetailPage() {
         // Fetch user teams
         try {
           const teamsResponse = await api.get(endpoints.userTeams());
-          setTeams((teamsResponse.data as Team[]) || []);
+          // API returns GenericResponse<IEnumerable<TeamResponseDto>>
+          const teamsData = teamsResponse.data as any;
+          setTeams(teamsData || []);
         } catch (error) {
           console.error("Failed to fetch teams:", error);
           setTeams([]);
         }
 
-        // Combine profiles and subscriptions data
-        const combined = (profilesResponse.data as Profile[]).map(profile => {
-          const subscription = userSubscriptions.find(sub => sub.profileId === profile.id);
+        // Combine profiles and subscriptions data (using mappedProfiles which already has mapped values)
+        const combined = (mappedProfiles || []).map((profile: Profile) => {
+          const subscription = (subscriptionsData || []).find((sub: Subscription) => sub.profileId === profile.id);
           return {
             profileId: profile.id,
             profileName: profile.name,
@@ -297,14 +332,18 @@ export default function UserDetailPage() {
     };
 
     fetchUserData();
-  }, [userId, router]);
+  }, [userId, router, authLoading, isAdmin]);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg">Loading...</div>
       </div>
     );
+  }
+
+  if (!isAdmin) {
+    return null;
   }
 
   if (!user) {
@@ -351,17 +390,7 @@ export default function UserDetailPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Status</p>
-                  <Badge variant={user.isActive ? "default" : "secondary"}>
-                    {user.isActive ? "Active" : "Inactive"}
-                  </Badge>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Role</p>
-                  <p className="text-sm">{user.role}</p>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Created At</p>
                   <p className="text-sm">{new Date(user.createdAt).toLocaleDateString()}</p>

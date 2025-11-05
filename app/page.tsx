@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter as useNextRouter } from "next/navigation";
+import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { Menu, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -33,15 +34,22 @@ import {
 
 const userColumns: ColumnDef<User>[] = [
   {
-    accessorKey: "email",
-    header: "Email",
+    id: "no",
+    header: "No",
+    cell: ({ row, table }: { row: any; table: any }) => {
+      const pageIndex = table.getState().pagination.pageIndex;
+      const pageSize = table.getState().pagination.pageSize;
+      return (
+        <div className="text-center font-medium text-sm">
+          {pageIndex * pageSize + row.index + 1}
+        </div>
+      );
+    },
+    enableSorting: false,
   },
   {
-    accessorKey: "isActive",
-    header: "Status",
-    cell: ({ row }) => {
-      return row.getValue("isActive") ? "Active" : "Inactive";
-    },
+    accessorKey: "email",
+    header: "Email",
   },
   {
     accessorKey: "socialAccountsCount",
@@ -73,19 +81,33 @@ const userColumns: ColumnDef<User>[] = [
 
 const userColumnsMobile: ColumnDef<User>[] = [
   {
+    id: "no",
+    header: "No",
+    cell: ({ row, table }: { row: any; table: any }) => {
+      const pageIndex = table.getState().pagination.pageIndex;
+      const pageSize = table.getState().pagination.pageSize;
+      return (
+        <div className="text-center font-medium text-sm">
+          {pageIndex * pageSize + row.index + 1}
+        </div>
+      );
+    },
+    enableSorting: false,
+  },
+  {
     accessorKey: "email",
     header: "Email",
   },
   {
-    accessorKey: "isActive",
-    header: "Status",
-    cell: ({ row }) => {
-      return row.getValue("isActive") ? "Active" : "Inactive";
-    },
-  },
-  {
     accessorKey: "socialAccountsCount",
     header: "Accounts",
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created At",
+    cell: ({ row }) => {
+      return new Date(row.getValue("createdAt")).toLocaleDateString();
+    },
   },
   {
     id: "actions",
@@ -114,46 +136,13 @@ export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const router = useNextRouter();
 
+  const { isLoading: authLoading, isAdmin, user: adminUser } = useAdminAuth();
+
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const supabase = createClient();
-        const { data: { session }, error } = await supabase.auth.getSession();
-
-        if (!session) {
-          router.push('/auth/login');
-          return;
-        } else {
-          // Check user role from API
-          try {
-            const userResponse = await api.get(endpoints.userProfile);
-            const userData = userResponse.data as any;
-
-            // Check if user has admin role (role = "Admin" or role = 2)
-            if (userData.role !== "Admin" && userData.role !== 2) {
-              toast.error('Access denied. Admin privileges required.');
-              await supabase.auth.signOut();
-              router.push('/auth/login');
-              return;
-            }
-
-            setUser(session.user);
-          } catch (roleError) {
-            console.error('Role check error:', roleError);
-            toast.error('Failed to verify admin privileges.');
-            await supabase.auth.signOut();
-            router.push('/auth/login');
-            return;
-          }
-        }
-      } catch (err) {
-        console.error('Auth check error:', err);
-        router.push('/auth/login');
-      }
-    };
-
-    checkAuth();
-  }, [router]);
+    if (!authLoading && adminUser) {
+      setUser({ email: adminUser.email } as any);
+    }
+  }, [authLoading, adminUser]);
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return
@@ -196,24 +185,31 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
+    if (authLoading) return;
+
     const fetchUsers = async () => {
       try {
-        const usersResponse = await api.get(endpoints.userSearch).catch(err => {
+        const usersResponse = await api.get(endpoints.userSearch({ page: 1, pageSize: 100 })).catch(err => {
           console.error('Users API error:', err);
-          return { data: [] };
+          return { data: { data: [] } };
         });
 
-        // Users API returns paginated data: { data: [...], totalCount: ..., ... }
-        setUsers((usersResponse.data as any)?.data || []);
+        // Users API returns GenericResponse<PagedResult<UserListDto>>
+        // Structure: { success: true, data: { data: [...], totalCount: ..., ... } }
+        const pagedData = usersResponse.data as any;
+        setUsers(pagedData?.data || []);
       } catch (error) {
         console.error("Failed to fetch users:", error);
+        toast.error("Failed to fetch users");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUsers();
-  }, []);
+    if (isAdmin) {
+      fetchUsers();
+    }
+  }, [authLoading, isAdmin]);
 
   const handleLogout = async () => {
     try {
@@ -227,12 +223,16 @@ export default function Dashboard() {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg">Loading...</div>
       </div>
     );
+  }
+
+  if (!isAdmin) {
+    return null;
   }
 
   const renderContent = () => {

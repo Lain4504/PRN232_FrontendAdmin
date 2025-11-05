@@ -9,7 +9,6 @@ import {
   BarChart3, 
   Calendar,
   Mail, 
-  Settings, 
   User, 
   Moon, 
   Sun, 
@@ -21,8 +20,6 @@ import {
   CheckCircle,
   Bell,
   TrendingUp,
-  HelpCircle,
-  BookOpen,
   Plus,
 } from "lucide-react"
 
@@ -155,30 +152,6 @@ const searchData: SearchItem[] = [
     description: "Manage your profile",
     category: "Navigation",
     keywords: ["profile", "account", "personal", "settings"]
-  },
-  {
-    title: "Settings",
-    url: "/dashboard/settings",
-    icon: Settings,
-    description: "Application settings",
-    category: "Navigation",
-    keywords: ["settings", "preferences", "configuration"]
-  },
-  {
-    title: "Help & Support",
-    url: "/dashboard/help",
-    icon: HelpCircle,
-    description: "Get help and support",
-    category: "Navigation",
-    keywords: ["help", "support", "documentation", "guide"]
-  },
-  {
-    title: "Documentation",
-    url: "/dashboard/docs",
-    icon: BookOpen,
-    description: "Browse documentation",
-    category: "Navigation",
-    keywords: ["docs", "documentation", "guide", "manual"]
   }
 ]
 

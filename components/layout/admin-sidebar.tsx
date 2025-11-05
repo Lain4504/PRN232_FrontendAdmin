@@ -6,7 +6,6 @@ import Link from "next/link"
 import {
   Users,
   CreditCard,
-  FileText,
   PanelLeftDashed,
 } from "lucide-react"
 
@@ -33,7 +32,7 @@ interface NavItem {
   url: string
   icon: React.ComponentType<{ className?: string }>
   badge?: string
-  section?: "users" | "payments" | "subscriptions"
+  section?: "users" | "payments"
 }
 
 const mainNavItems: NavItem[] = [
@@ -49,15 +48,9 @@ const mainNavItems: NavItem[] = [
     icon: CreditCard,
     section: "payments",
   },
-  {
-    title: "Subscriptions",
-    url: "/subscriptions",
-    icon: FileText,
-    section: "subscriptions",
-  },
 ]
 
-export function AdminSidebar({ onSectionChange }: { onSectionChange?: (section: "users" | "payments" | "subscriptions") => void }) {
+export function AdminSidebar({ onSectionChange }: { onSectionChange?: (section: "users" | "payments") => void }) {
   const pathname = usePathname()
   const [sidebarModeState, setSidebarModeState] = React.useState<'expanded' | 'collapsed' | 'hover'>('hover')
 
