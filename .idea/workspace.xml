@@ -4,20 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="697d610e-5bf9-4a6f-a1e5-0d9116f34c2f" name="Changes" comment="create uxuipromax">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="697d610e-5bf9-4a6f-a1e5-0d9116f34c2f" name="Changes" comment="remove supbase auth">
+      <change beforePath="$PROJECT_DIR$/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/globals.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/payments/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/payments/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/user/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/user/[id]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/user/[id]/profile/[profileId]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/user/[id]/profile/[profileId]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/pages/login/login-form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/pages/login/login-form.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hooks/use-admin-auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/hooks/use-admin-auth.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/supabase/client.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/supabase/middleware.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/supabase/server.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,12 +32,12 @@
     &quot;assignee&quot;: &quot;Lain4504&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/khanhsveehjhj/PRN232_FrontendAdmin.git",
-    "accountId": "5126b88c-ccf3-4397-984d-7c1b52a2aa60"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/khanhsveehjhj/PRN232_FrontendAdmin.git&quot;,
+    &quot;accountId&quot;: &quot;5126b88c-ccf3-4397-984d-7c1b52a2aa60&quot;
   }
-}]]></component>
+}</component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -61,33 +50,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "js.debugger.nextJs.config.created.client": "true",
-    "js.debugger.nextJs.config.created.server": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "E:/Ky8/PRN232/Project/PRN232_FrontendAdmin",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "to.speed.mode.migration.done": "true",
-    "ts.external.directory.path": "E:\\projectdev\\PRN232\\Project\\PRN232_FrontendAdmin\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
+    &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/Ky8/PRN232/Project/PRN232_FrontendAdmin&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;E:\\projectdev\\PRN232\\Project\\PRN232_FrontendAdmin\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="E:\Ky8\PRN232\Project\PRN232_FrontendAdmin" />
@@ -129,7 +118,7 @@
       <workItem from="1762075485670" duration="79000" />
       <workItem from="1762076046221" duration="11000" />
       <workItem from="1762303941218" duration="4211000" />
-      <workItem from="1769435363864" duration="987000" />
+      <workItem from="1769435363864" duration="1806000" />
     </task>
     <task id="LOCAL-00001" summary="update production url">
       <option name="closed" value="true" />
@@ -195,7 +184,15 @@
       <option name="project" value="LOCAL" />
       <updated>1769435437220</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="remove supbase auth">
+      <option name="closed" value="true" />
+      <created>1769436370011</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1769436370011</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -229,7 +226,8 @@
     <MESSAGE value="update response api mapping" />
     <MESSAGE value="update UI theme style for admin" />
     <MESSAGE value="create uxuipromax" />
-    <option name="LAST_COMMIT_MESSAGE" value="create uxuipromax" />
+    <MESSAGE value="remove supbase auth" />
+    <option name="LAST_COMMIT_MESSAGE" value="remove supbase auth" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>

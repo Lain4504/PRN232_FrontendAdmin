@@ -10,6 +10,7 @@ interface AdminUser {
   id: string;
   email: string;
   role: string | number;
+  fullName?: string;
 }
 
 export function useAdminAuth() {
@@ -45,6 +46,7 @@ export function useAdminAuth() {
             id: userData.id,
             email: userData.email,
             role: userData.role,
+            fullName: userData.fullName,
           };
           setUser(newUser);
           authStore.setUser(newUser);

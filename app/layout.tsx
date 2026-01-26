@@ -1,12 +1,26 @@
 import type { Metadata } from "next";
-import { League_Spartan } from "next/font/google";
+import { Plus_Jakarta_Sans, Fira_Sans, Fira_Mono } from "next/font/google";
 import "./globals.css";
 
-const leagueSpartan = League_Spartan({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-league-spartan",
+  variable: "--font-plus-jakarta",
   display: "swap",
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  weight: ["200", "300", "400", "500", "600", "700", "800"],
+});
+
+const firaSans = Fira_Sans({
+  subsets: ["latin"],
+  variable: "--font-fira-sans",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+const firaMono = Fira_Mono({
+  subsets: ["latin"],
+  variable: "--font-fira-mono",
+  display: "swap",
+  weight: ["400", "500", "700"],
 });
 
 export const metadata: Metadata = {
@@ -22,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${leagueSpartan.className} ${leagueSpartan.variable} antialiased`}
+        className={`${plusJakartaSans.className} ${plusJakartaSans.variable} ${firaSans.variable} ${firaMono.variable} antialiased`}
         suppressHydrationWarning
       >
         {children}

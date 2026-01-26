@@ -5,12 +5,15 @@ import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, CreditCard, Building, Share2, Users } from "lucide-react";
+import { ArrowLeft, User, CreditCard, Building, Share2, Users, Calendar, Activity, Info, ExternalLink, Shield } from "lucide-react";
 import { api, endpoints, Profile, Subscription } from "@/lib/api";
-import { authStore } from "@/lib/auth-store";
 import { toast } from "sonner";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
+import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { useAdminAuth } from "@/hooks/use-admin-auth";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 // Mapping functions for profileType and status
 const mapProfileType = (type: number | string): string => {
@@ -34,10 +37,8 @@ const mapProfileStatus = (status: number | string): string => {
   return statusMap[status] || 'Unknown';
 };
 
-// Helper to format platform name
 const formatPlatformName = (platform: string): string => {
   if (!platform) return 'Unknown';
-  // Capitalize first letter
   return platform.charAt(0).toUpperCase() + platform.slice(1).toLowerCase();
 };
 
@@ -66,91 +67,6 @@ interface Team {
   memberCount: number;
 }
 
-const brandColumns: ColumnDef<Brand>[] = [
-  {
-    accessorKey: "name",
-    header: "Brand Name",
-  },
-  {
-    accessorKey: "description",
-    header: "Description",
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      return <Badge variant={row.getValue("status") === "Active" ? "default" : "secondary"}>
-        {row.getValue("status")}
-      </Badge>;
-    },
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
-    cell: ({ row }) => {
-      return new Date(row.getValue("createdAt")).toLocaleDateString();
-    },
-  },
-];
-
-const socialAccountColumns: ColumnDef<SocialAccount>[] = [
-  {
-    accessorKey: "platform",
-    header: "Platform",
-  },
-  {
-    accessorKey: "username",
-    header: "Username",
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      return <Badge variant={row.getValue("status") === "Active" ? "default" : "secondary"}>
-        {row.getValue("status")}
-      </Badge>;
-    },
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
-    cell: ({ row }) => {
-      return new Date(row.getValue("createdAt")).toLocaleDateString();
-    },
-  },
-];
-
-const teamColumns: ColumnDef<Team>[] = [
-  {
-    accessorKey: "name",
-    header: "Team Name",
-  },
-  {
-    accessorKey: "description",
-    header: "Description",
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      return <Badge variant={row.getValue("status") === "Active" ? "default" : "secondary"}>
-        {row.getValue("status")}
-      </Badge>;
-    },
-  },
-  {
-    accessorKey: "memberCount",
-    header: "Members",
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
-    cell: ({ row }) => {
-      return new Date(row.getValue("createdAt")).toLocaleDateString();
-    },
-  },
-];
-
 export default function ProfileDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -164,130 +80,167 @@ export default function ProfileDetailPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const { isLoading: authLoading, isAdmin } = useAdminAuth();
+
+  const brandColumns: ColumnDef<Brand>[] = [
+    {
+      accessorKey: "name",
+      header: "Brand Name",
+      cell: ({ row }) => <span className="font-medium text-foreground">{row.original.name}</span>
+    },
+    {
+      accessorKey: "description",
+      header: "Description",
+      cell: ({ row }) => <span className="text-muted-foreground text-sm line-clamp-1 max-w-[300px]">{row.original.description || "—"}</span>
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <Badge variant="outline" className={cn(
+          "font-semibold",
+          row.original.status === "Active" ? "bg-success/10 text-success border-success/20" : "bg-muted text-muted-foreground border-transparent"
+        )}>
+          {row.original.status}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Created",
+      cell: ({ row }) => <span className="text-sm text-muted-foreground">{new Date(row.original.createdAt).toLocaleDateString()}</span>
+    },
+  ];
+
+  const socialAccountColumns: ColumnDef<SocialAccount>[] = [
+    {
+      accessorKey: "platform",
+      header: "Platform",
+      cell: ({ row }) => (
+        <Badge variant="secondary" className="bg-muted font-medium">
+          {row.original.platform}
+        </Badge>
+      )
+    },
+    {
+      accessorKey: "username",
+      header: "Username",
+      cell: ({ row }) => <span className="font-mono text-xs">{row.original.username}</span>
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <Badge variant="outline" className={cn(
+          "font-semibold",
+          row.original.status === "Active" ? "bg-success/10 text-success border-success/20" : "bg-muted text-muted-foreground border-transparent"
+        )}>
+          {row.original.status}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Linked On",
+      cell: ({ row }) => <span className="text-sm text-muted-foreground">{new Date(row.original.createdAt).toLocaleDateString()}</span>
+    },
+  ];
+
+  const teamColumns: ColumnDef<Team>[] = [
+    {
+      accessorKey: "name",
+      header: "Team Name",
+      cell: ({ row }) => <span className="font-medium text-foreground">{row.original.name}</span>
+    },
+    {
+      accessorKey: "memberCount",
+      header: "Members",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1.5">
+          <Users className="h-3.5 w-3.5 text-muted-foreground" />
+          <span>{row.original.memberCount} members</span>
+        </div>
+      )
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <Badge variant="outline" className={cn(
+          "font-semibold",
+          row.original.status === "Active" ? "bg-success/10 text-success border-success/20" : "bg-muted text-muted-foreground border-transparent"
+        )}>
+          {row.original.status}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Founded",
+      cell: ({ row }) => <span className="text-sm text-muted-foreground">{new Date(row.original.createdAt).toLocaleDateString()}</span>
+    },
+  ];
+
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        if (!authStore.isAuthenticated()) {
-          router.push('/auth/login');
-          return;
-        }
+    if (authLoading || !isAdmin) return;
+    if (!userId || !profileId) return;
 
-        // Check admin role
-        const userResponse = await api.get(endpoints.userProfile);
-        const userData = userResponse.data as any;
-
-        if (userData.role !== "Admin" && userData.role !== 2 && userData.role !== "2") {
-          toast.error('Access denied. Admin privileges required.');
-          authStore.clearAuth();
-          router.push('/auth/login');
-          return;
-        }
-      } catch (err) {
-        console.error('Auth check error:', err);
-        router.push('/auth/login');
-      }
-    };
-
-    checkAuth();
-  }, [router]);
-
-  useEffect(() => {
     const fetchProfileData = async () => {
-      if (!userId || !profileId) return;
-
       try {
-        // Fetch profile details
         const profilesResponse = await api.get(endpoints.profilesByUser(userId));
         const userProfilesData = (profilesResponse.data as any[]) || [];
-        // Map profileType and status from numbers to strings
-        const userProfiles = userProfilesData.map((profile: any) => ({
-          ...profile,
-          profileType: mapProfileType(profile.profileType),
-          status: mapProfileStatus(profile.status)
+        const userProfiles = userProfilesData.map((p: any) => ({
+          ...p,
+          profileType: mapProfileType(p.profileType),
+          status: mapProfileStatus(p.status)
         }));
         const currentProfile = userProfiles.find(p => p.id === profileId);
 
-        if (!currentProfile) {
-          throw new Error('Profile not found');
-        }
-
+        if (!currentProfile) throw new Error('Profile not found');
         setProfile(currentProfile);
 
-        // Fetch subscription for this profile
         const subscriptionsResponse = await api.get('/payment/subscriptions');
         const userSubscriptions = (subscriptionsResponse.data as Subscription[])?.filter(
           sub => sub.profileId === profileId
         ) || [];
         setSubscription(userSubscriptions[0] || null);
 
-        // Fetch user brands - API needs X-Profile-Id header
+        // Fetch Brands, Social Accounts, and Teams with proper headers
+        const originalProfileId = typeof window !== 'undefined' ? localStorage.getItem('activeProfileId') : null;
+        if (typeof window !== 'undefined') localStorage.setItem('activeProfileId', profileId);
+
         try {
-          // Temporarily set profileId in localStorage for API context
-          const originalProfileId = typeof window !== 'undefined' ? localStorage.getItem('activeProfileId') : null;
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('activeProfileId', profileId);
-          }
+          const [brandsRes, socialRes, teamsRes] = await Promise.all([
+            api.get(endpoints.brands()),
+            api.get(endpoints.socialAccountsUser(profileId)),
+            api.get(endpoints.userTeams())
+          ]);
 
-          try {
-            // Set profileId in localStorage so API context headers will use it
-            const brandsResponse = await api.get(endpoints.brands());
+          const brandsData = (brandsRes.data as any)?.data || brandsRes.data || [];
+          setBrands(brandsData.map((b: any) => ({
+            id: b.id,
+            name: b.name || 'Unnamed Brand',
+            description: b.description || '',
+            status: b.isDeleted ? 'Deleted' : 'Active',
+            createdAt: b.createdAt || new Date().toISOString()
+          })));
 
-            // API returns PagedResult<BrandResponseDto>
-            const brandsData = brandsResponse.data as any;
-            const brandsList = brandsData?.data || brandsData || [];
-
-            // Map backend response to frontend format
-            const mappedBrands: Brand[] = brandsList.map((brand: any) => ({
-              id: brand.id,
-              name: brand.name || 'Unnamed Brand',
-              description: brand.description || '',
-              status: brand.isDeleted ? 'Deleted' : 'Active',
-              createdAt: brand.createdAt || new Date().toISOString()
-            }));
-
-            setBrands(mappedBrands);
-          } finally {
-            // Restore original profileId
-            if (typeof window !== 'undefined') {
-              if (originalProfileId) {
-                localStorage.setItem('activeProfileId', originalProfileId);
-              } else {
-                localStorage.removeItem('activeProfileId');
-              }
-            }
-          }
-        } catch (error) {
-          console.error("Failed to fetch brands:", error);
-          setBrands([]);
-        }
-
-        // Fetch user social accounts - API expects profileId, not userId
-        try {
-          const socialAccountsResponse = await api.get(endpoints.socialAccountsUser(profileId));
-          const socialAccountsData = (socialAccountsResponse.data as any[]) || [];
-          // Map backend response to frontend format
-          const mappedSocialAccounts: SocialAccount[] = socialAccountsData.map((account: any) => ({
+          const socialData = (socialRes.data as any[]) || [];
+          setSocialAccounts(socialData.map((account: any) => ({
             id: account.id,
             platform: formatPlatformName(account.provider || account.platform || 'Unknown'),
             username: account.providerUserId || account.username || 'N/A',
             status: account.isActive ? 'Active' : 'Inactive',
             createdAt: account.createdAt || new Date().toISOString()
-          }));
-          setSocialAccounts(mappedSocialAccounts);
-        } catch (error) {
-          console.error("Failed to fetch social accounts:", error);
-          setSocialAccounts([]);
-        }
+          })));
 
-        // Fetch user teams
-        try {
-          const teamsResponse = await api.get(endpoints.userTeams());
-          setTeams((teamsResponse.data as Team[]) || []);
-        } catch (error) {
-          console.error("Failed to fetch teams:", error);
-          setTeams([]);
+          setTeams((teamsRes.data as Team[]) || []);
+        } finally {
+          if (typeof window !== 'undefined') {
+            if (originalProfileId) localStorage.setItem('activeProfileId', originalProfileId);
+            else localStorage.removeItem('activeProfileId');
+          }
         }
-
       } catch (error) {
         console.error("Failed to fetch profile data:", error);
         toast.error("Failed to load profile data");
@@ -297,211 +250,300 @@ export default function ProfileDetailPage() {
     };
 
     fetchProfileData();
-  }, [userId, profileId]);
+  }, [userId, profileId, authLoading, isAdmin]);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading...</div>
+      <div className="flex items-center justify-center min-h-screen bg-background text-muted-foreground animate-pulse">
+        <div className="h-10 w-10 rounded-full border-4 border-primary border-t-transparent animate-spin" />
       </div>
     );
   }
 
+  if (!isAdmin) return null;
+
   if (!profile) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Profile Not Found</h1>
-          <p className="text-muted-foreground mb-6">The requested profile could not be found.</p>
-          <Button onClick={() => router.push(`/user/${userId}`)}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center min-h-[400px] text-center gap-4">
+          <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
+            <User className="h-10 w-10 text-muted-foreground" />
+          </div>
+          <h1 className="text-2xl font-bold">Profile Not Found</h1>
+          <p className="text-muted-foreground max-w-sm">
+            We couldn't find the requested profile for this user account.
+          </p>
+          <Button onClick={() => router.push(`/user/${userId}`)} variant="outline">
             Back to User Details
           </Button>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="max-w-7xl mx-auto py-6 px-4">
-        {/* Header */}
-        <div className="mb-6">
-          <Button variant="outline" size="sm" className="mb-4 w-full sm:w-auto" onClick={() => router.push(`/user/${userId}`)}>
+    <DashboardLayout>
+      <div className="flex flex-col gap-8 pb-10">
+        {/* Navigation & Header */}
+        <div className="flex flex-col gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-fit -ml-2 text-muted-foreground hover:text-foreground hover:bg-muted"
+            onClick={() => router.push(`/user/${userId}`)}
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to User Details
+            User Details
           </Button>
 
-          <div className="flex items-center gap-4 mb-4">
-            <div>
-              <h1 className="text-3xl font-bold">Profile Details</h1>
-              <p className="text-muted-foreground">Complete information for {profile.name}</p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold text-2xl border border-primary/20 shadow-sm relative overflow-hidden group">
+                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                {profile.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-3xl font-bold tracking-tight">{profile.name}</h1>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="outline" className="font-normal text-muted-foreground">Profile: {profile.id}</Badge>
+                  <Badge className={cn(
+                    "font-semibold",
+                    profile.profileType === "Pro" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                  )}>
+                    {profile.profileType} Plan
+                  </Badge>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="space-y-6">
-          {/* Profile Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Profile Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Name</p>
-                  <p>{profile.name}</p>
+        {/* Quick Info Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="bg-card/50 border-border/50">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                  <Activity className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Type</p>
-                  <Badge variant={profile.profileType === "Pro" ? "default" : profile.profileType === "Basic" ? "secondary" : "outline"}>
-                    {profile.profileType}
-                  </Badge>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Status</p>
-                  <Badge variant={profile.status === "Active" ? "default" : "secondary"}>
-                    {profile.status}
-                  </Badge>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Company</p>
-                  <p>{profile.companyName || "N/A"}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-sm font-medium text-muted-foreground">Bio</p>
-                  <p>{profile.bio || "No bio available"}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Created At</p>
-                  <p>{new Date(profile.createdAt).toLocaleDateString()}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Updated At</p>
-                  <p>{new Date(profile.updatedAt).toLocaleDateString()}</p>
+                  <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Status</p>
+                  <p className="text-lg font-bold">{profile.status}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Subscription Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                Subscription
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {subscription ? (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Plan</p>
-                    <p>{subscription.plan}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Status</p>
-                    <Badge variant={subscription.isActive ? "default" : "secondary"}>
-                      {subscription.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Posts/Month</p>
-                    <p>{subscription.quotaPostsPerMonth}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Storage (GB)</p>
-                    <p>{subscription.quotaStorageGb}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Start Date</p>
-                    <p>{new Date(subscription.startDate).toLocaleDateString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">End Date</p>
-                    <p>{subscription.endDate ? new Date(subscription.endDate).toLocaleDateString() : "N/A"}</p>
-                  </div>
+          <Card className="bg-card/50 border-border/50">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+                  <Building className="h-5 w-5" />
                 </div>
-              ) : (
-                <p className="text-muted-foreground">No subscription found</p>
-              )}
+                <div>
+                  <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Company</p>
+                  <p className="text-lg font-bold truncate max-w-[120px]">{profile.companyName || "N/A"}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Brands */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Building className="h-5 w-5" />
-                Brands ({brands.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {brands.length === 0 ? (
-                <p className="text-muted-foreground">No brands found for this profile.</p>
-              ) : (
-                <DataTable
-                  columns={brandColumns}
-                  data={brands}
-                  showSearch={false}
-                  showPageSize={false}
-                  pageSize={5}
-                />
-              )}
+          <Card className="bg-card/50 border-border/50">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500">
+                  <Calendar className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Member Since</p>
+                  <p className="text-lg font-bold">{new Date(profile.createdAt).toLocaleDateString()}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Social Accounts */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Share2 className="h-5 w-5" />
-                Social Accounts ({socialAccounts.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {socialAccounts.length === 0 ? (
-                <p className="text-muted-foreground">No social accounts found for this profile.</p>
-              ) : (
-                <DataTable
-                  columns={socialAccountColumns}
-                  data={socialAccounts}
-                  showSearch={false}
-                  showPageSize={false}
-                  pageSize={5}
-                />
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Teams */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Teams ({teams.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {teams.length === 0 ? (
-                <p className="text-muted-foreground">No teams found for this profile.</p>
-              ) : (
-                <DataTable
-                  columns={teamColumns}
-                  data={teams}
-                  showSearch={false}
-                  showPageSize={false}
-                  pageSize={5}
-                />
-              )}
+          <Card className="bg-primary text-primary-foreground border-none relative overflow-hidden shadow-lg shadow-primary/20">
+            <div className="absolute right-0 top-0 h-full w-1/3 bg-white/5 skew-x-12" />
+            <CardContent className="pt-6 relative z-10">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
+                  <Shield className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs opacity-80 font-bold uppercase tracking-wider">Platform Role</p>
+                  <p className="text-lg font-bold">Managed Entity</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Detailed Info & Resources */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Metadata & Subscription Sidebar */}
+          <div className="flex flex-col gap-6">
+            <Card className="bg-card/50 border-border/50 shadow-sm overflow-hidden">
+              <CardHeader className="bg-muted/40 border-b border-border/20 py-4">
+                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                  <Info className="h-4 w-4 text-primary" /> Profile Metadata
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6 space-y-5">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Biography</label>
+                  <p className="text-sm leading-relaxed text-foreground/80">{profile.bio || "No information provided."}</p>
+                </div>
+                <div className="space-y-1.5 pt-2">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Last Updated</label>
+                  <p className="text-xs font-mono">{new Date(profile.updatedAt).toLocaleString()}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/50 border-border/50 shadow-sm overflow-hidden">
+              <CardHeader className="bg-primary/5 border-b border-primary/10 py-4">
+                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-primary" /> Subscription Info
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                {subscription ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/50">
+                      <span className="text-xs font-bold uppercase tracking-tight text-muted-foreground">Active Plan</span>
+                      <Badge className="bg-primary text-primary-foreground font-bold">{subscription.plan}</Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 rounded-xl border border-border/50 text-center">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Posts/Mo</p>
+                        <p className="text-lg font-black">{subscription.quotaPostsPerMonth}</p>
+                      </div>
+                      <div className="p-3 rounded-xl border border-border/50 text-center">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Storage</p>
+                        <p className="text-lg font-black">{subscription.quotaStorageGb}GB</p>
+                      </div>
+                    </div>
+                    <div className="pt-2 text-center">
+                      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest mb-1">Valid Until</p>
+                      <p className="text-xs font-mono font-bold">
+                        {subscription.endDate ? new Date(subscription.endDate).toLocaleDateString() : "Permanent"}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-8 text-center bg-muted/20 rounded-xl border border-dashed border-border/50">
+                    <p className="text-xs text-muted-foreground font-medium">No active subscription found</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Resources Tabs */}
+          <div className="lg:col-span-2">
+            <Card className="bg-card/30 border-border/50 shadow-xl shadow-foreground/[0.02] overflow-hidden min-h-[600px]">
+              <Tabs defaultValue="brands" className="w-full">
+                <CardHeader className="bg-card/50 border-b border-border/20 px-6 py-4">
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex flex-col gap-1">
+                      <CardTitle className="text-xl">Resources</CardTitle>
+                      <CardDescription>Managed objects associated with this profile entity.</CardDescription>
+                    </div>
+                    <TabsList className="bg-background/80 border border-border/40 p-1 rounded-xl">
+                      <TabsTrigger value="brands" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">
+                        <Building className="h-3.5 w-3.5 mr-2" /> Brands
+                      </TabsTrigger>
+                      <TabsTrigger value="social" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">
+                        <Share2 className="h-3.5 w-3.5 mr-2" /> Social
+                      </TabsTrigger>
+                      <TabsTrigger value="teams" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">
+                        <Users className="h-3.5 w-3.5 mr-2" /> Teams
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="p-0">
+                  <TabsContent value="brands" className="m-0 focus-visible:outline-none">
+                    <div className="p-6">
+                      {brands.length === 0 ? (
+                        <div className="py-32 flex flex-col items-center justify-center text-center gap-4 animate-in fade-in duration-700">
+                          <div className="h-16 w-16 rounded-3xl bg-muted/40 flex items-center justify-center">
+                            <Building className="h-8 w-8 text-muted-foreground/50" />
+                          </div>
+                          <div>
+                            <p className="text-lg font-bold">No Brands Linked</p>
+                            <p className="text-sm text-muted-foreground max-w-[280px] mx-auto">This profile hasn't initialized any business branding yet.</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <DataTable
+                          columns={brandColumns}
+                          data={brands}
+                          showSearch={true}
+                          showPageSize={true}
+                          pageSize={5}
+                          className="border-none"
+                        />
+                      )}
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="social" className="m-0 focus-visible:outline-none">
+                    <div className="p-6">
+                      {socialAccounts.length === 0 ? (
+                        <div className="py-32 flex flex-col items-center justify-center text-center gap-4 animate-in fade-in duration-700">
+                          <div className="h-16 w-16 rounded-3xl bg-muted/40 flex items-center justify-center">
+                            <Share2 className="h-8 w-8 text-muted-foreground/50" />
+                          </div>
+                          <div>
+                            <p className="text-lg font-bold">No Social Connections</p>
+                            <p className="text-sm text-muted-foreground max-w-[280px] mx-auto">No external social media platforms are currently linked.</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <DataTable
+                          columns={socialAccountColumns}
+                          data={socialAccounts}
+                          showSearch={true}
+                          showPageSize={true}
+                          pageSize={5}
+                          className="border-none"
+                        />
+                      )}
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="teams" className="m-0 focus-visible:outline-none">
+                    <div className="p-6">
+                      {teams.length === 0 ? (
+                        <div className="py-32 flex flex-col items-center justify-center text-center gap-4 animate-in fade-in duration-700">
+                          <div className="h-16 w-16 rounded-3xl bg-muted/40 flex items-center justify-center">
+                            <Users className="h-8 w-8 text-muted-foreground/50" />
+                          </div>
+                          <div>
+                            <p className="text-lg font-bold">Solo Profile</p>
+                            <p className="text-sm text-muted-foreground max-w-[280px] mx-auto">This profile is not part of any workgroup or organizational teams.</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <DataTable
+                          columns={teamColumns}
+                          data={teams}
+                          showSearch={true}
+                          showPageSize={true}
+                          pageSize={5}
+                          className="border-none"
+                        />
+                      )}
+                    </div>
+                  </TabsContent>
+                </CardContent>
+              </Tabs>
+            </Card>
+          </div>
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
