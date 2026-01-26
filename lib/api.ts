@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/client'
+import { authStore } from './auth-store'
 
 // Types
 export interface ApiResponse<T> {
@@ -29,18 +29,20 @@ export interface ApiRequestOptions {
   headers?: Record<string, string>
 }
 
-// Auth fetch helper
-async function fetchWithAuth(url: string, options: RequestInit = {}, reqOptions: ApiRequestOptions = {}) {
-   const { requireAuth = true } = reqOptions
+// Global flag to prevent multiple refresh attempts
+let isRefreshing = false
 
-   const authHeader: Record<string, string> = {}
-   if (requireAuth) {
-     const supabase = createClient()
-     const { data: { session } } = await supabase.auth.getSession()
-     if (session?.access_token) {
-       authHeader['Authorization'] = `Bearer ${session.access_token}`
-     }
-   }
+// Auth fetch helper
+async function fetchWithAuth(url: string, options: RequestInit = {}, reqOptions: ApiRequestOptions = {}): Promise<Response> {
+  const { requireAuth = true } = reqOptions
+
+  const authHeader: Record<string, string> = {}
+  if (requireAuth) {
+    const token = authStore.getAccessToken()
+    if (token) {
+      authHeader['Authorization'] = `Bearer ${token}`
+    }
+  }
 
   // Add profile and team context headers
   const contextHeaders: Record<string, string> = {}
@@ -67,10 +69,52 @@ async function fetchWithAuth(url: string, options: RequestInit = {}, reqOptions:
   }
 
   try {
-    return await fetch(`${API_URL}${url}`, {
+    let response = await fetch(`${API_URL}${url}`, {
       ...options,
       headers,
     })
+
+    // Handle Token Refresh
+    if (response.status === 401 && requireAuth && !isRefreshing) {
+      isRefreshing = true
+      try {
+        const refreshToken = authStore.getRefreshToken()
+        if (refreshToken) {
+          const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken }),
+          })
+
+          if (refreshRes.ok) {
+            const refreshData = await refreshRes.json()
+            if (refreshData.success) {
+              const { accessToken, refreshToken: newRefreshToken } = refreshData.data
+              authStore.setTokens(accessToken, newRefreshToken)
+
+              // Retry original request
+              headers['Authorization'] = `Bearer ${accessToken}`
+              response = await fetch(`${API_URL}${url}`, {
+                ...options,
+                headers,
+              })
+            }
+          } else {
+            // Refresh failed, clear auth and redirect to login
+            authStore.clearAuth()
+            if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/auth')) {
+              window.location.href = '/auth/login'
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Token refresh failed:', err)
+      } finally {
+        isRefreshing = false
+      }
+    }
+
+    return response
   } catch (error) {
     console.error('Fetch error:', error)
     throw error
@@ -83,7 +127,8 @@ export const api = {
   get: async <T>(url: string, options?: ApiRequestOptions): Promise<ApiResponse<T>> => {
     const response = await fetchWithAuth(url, {}, options)
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`)
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.message || `HTTP ${response.status}`)
     }
     return response.json()
   },
@@ -95,20 +140,23 @@ export const api = {
       body: data ? JSON.stringify(data) : undefined,
     }, options)
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`)
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.message || `HTTP ${response.status}`)
     }
     return response.json()
   },
 
   // POST multipart/form-data
   postForm: async <T>(url: string, formData: FormData, options?: ApiRequestOptions): Promise<ApiResponse<T>> => {
-    // Let browser set the multipart boundary; do not set Content-Type
     const response = await fetchWithAuth(url, {
       method: 'POST',
       body: formData,
       headers: {},
     }, { ...options, headers: {} })
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.message || `HTTP ${response.status}`)
+    }
     return response.json()
   },
 
@@ -118,7 +166,10 @@ export const api = {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
     }, options)
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.message || `HTTP ${response.status}`)
+    }
     return response.json()
   },
 
@@ -129,7 +180,10 @@ export const api = {
       body: formData,
       headers: {},
     }, { ...options, headers: {} })
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.message || `HTTP ${response.status}`)
+    }
     return response.json()
   },
 
@@ -143,7 +197,10 @@ export const api = {
     }
 
     const response = await fetchWithAuth(url, requestOptions, options)
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.message || `HTTP ${response.status}`)
+    }
     return response.json()
   },
 
@@ -153,72 +210,39 @@ export const api = {
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined,
     }, options)
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.message || `HTTP ${response.status}`)
+    }
     return response.json()
   },
 
   // POST Multipart (for file uploads)
   postMultipart: async <T>(url: string, formData: FormData, options?: ApiRequestOptions): Promise<ApiResponse<T>> => {
-    const { requireAuth = true } = options || {}
-
-    const authHeader: Record<string, string> = {}
-    if (requireAuth) {
-      const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.access_token) {
-        authHeader['Authorization'] = `Bearer ${session.access_token}`
-      }
-    }
-
-    // Don't set Content-Type for FormData, let browser set it with boundary
-    const headers: Record<string, string> = {
-      ...(options?.headers || {}),
-      ...authHeader,
-    }
-    
-    const response = await fetch(`${API_URL}${url}`, {
+    const response = await fetchWithAuth(url, {
       method: 'POST',
       body: formData,
-      headers,
-    })
+      headers: {}, // fetchWithAuth will handle Authorization
+    }, options)
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error(`API Error ${response.status}:`, errorText)
-      throw new Error(`HTTP ${response.status}: ${errorText}`)
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.message || `HTTP ${response.status}`)
     }
     return response.json()
   },
 
   // PUT Multipart (for file uploads)
   putMultipart: async <T>(url: string, formData: FormData, options?: ApiRequestOptions): Promise<ApiResponse<T>> => {
-    const { requireAuth = true } = options || {}
-
-    const authHeader: Record<string, string> = {}
-    if (requireAuth) {
-      const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.access_token) {
-        authHeader['Authorization'] = `Bearer ${session.access_token}`
-      }
-    }
-
-    // Don't set Content-Type for FormData, let browser set it with boundary
-    const headers: Record<string, string> = {
-      ...(options?.headers || {}),
-      ...authHeader,
-    }
-
-    const response = await fetch(`${API_URL}${url}`, {
+    const response = await fetchWithAuth(url, {
       method: 'PUT',
       body: formData,
-      headers,
-    })
+      headers: {}, // fetchWithAuth will handle Authorization
+    }, options)
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error(`API Error ${response.status}:`, errorText)
-      throw new Error(`HTTP ${response.status}: ${errorText}`)
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.message || `HTTP ${response.status}`)
     }
     return response.json()
   },
@@ -433,7 +457,7 @@ export const endpoints = {
   paymentsHistory: () => '/payment/history',
   paymentsAll: () => '/payment/admin/all',
   userPayments: (userId: string) => `/payment/admin/user/${userId}/payments`,
-  
+
   // Subscription endpoints
   subscriptions: () => '/payment/subscriptions',
   subscriptionsAll: () => '/payment/admin/subscriptions',

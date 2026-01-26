@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { api, endpoints } from "@/lib/api";
+import { authStore } from "@/lib/auth-store";
 import { toast } from "sonner";
 
 interface AdminUser {
   id: string;
   email: string;
-  role: string;
+  role: string | number;
 }
 
 export function useAdminAuth() {
@@ -21,39 +21,38 @@ export function useAdminAuth() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const supabase = createClient();
-        const { data: { session }, error } = await supabase.auth.getSession();
-
-        if (!session) {
+        if (!authStore.isAuthenticated()) {
           router.push('/auth/login');
           return;
         }
 
-        // Check user role from API
+        // Check user role from API or use stored user
         try {
           const userResponse = await api.get(endpoints.userProfile);
           const userData = userResponse.data as any;
 
-          // Check if user has admin role (role = "Admin" or role = 2)
+          // Check if user has admin role (role = "Admin" or role = 2 or role = "2")
           const hasAdminRole = userData.role === "Admin" || userData.role === 2 || userData.role === "2";
-          
+
           if (!hasAdminRole) {
             toast.error('Access denied. Admin privileges required.');
-            await supabase.auth.signOut();
+            authStore.clearAuth();
             router.push('/auth/login');
             return;
           }
 
-          setUser({
+          const newUser = {
             id: userData.id,
             email: userData.email,
             role: userData.role,
-          });
+          };
+          setUser(newUser);
+          authStore.setUser(newUser);
           setIsAdmin(true);
         } catch (roleError) {
           console.error('Role check error:', roleError);
           toast.error('Failed to verify admin privileges.');
-          await supabase.auth.signOut();
+          authStore.clearAuth();
           router.push('/auth/login');
           return;
         }
@@ -78,16 +77,13 @@ export function useRedirectIfLoggedIn() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
-
-        if (session) {
+        if (authStore.isAuthenticated()) {
           // Check if user is admin
           try {
             const userResponse = await api.get(endpoints.userProfile);
             const userData = userResponse.data as any;
             const hasAdminRole = userData.role === "Admin" || userData.role === 2 || userData.role === "2";
-            
+
             if (hasAdminRole) {
               router.push('/');
               return;

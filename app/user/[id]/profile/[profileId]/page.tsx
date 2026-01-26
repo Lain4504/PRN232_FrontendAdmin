@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, User, CreditCard, Building, Share2, Users } from "lucide-react";
 import { api, endpoints, Profile, Subscription } from "@/lib/api";
-import { createClient } from "@/lib/supabase/client";
+import { authStore } from "@/lib/auth-store";
 import { toast } from "sonner";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
@@ -167,10 +167,7 @@ export default function ProfileDetailPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
-
-        if (!session) {
+        if (!authStore.isAuthenticated()) {
           router.push('/auth/login');
           return;
         }
@@ -179,9 +176,9 @@ export default function ProfileDetailPage() {
         const userResponse = await api.get(endpoints.userProfile);
         const userData = userResponse.data as any;
 
-        if (userData.role !== "Admin" && userData.role !== 2) {
+        if (userData.role !== "Admin" && userData.role !== 2 && userData.role !== "2") {
           toast.error('Access denied. Admin privileges required.');
-          await supabase.auth.signOut();
+          authStore.clearAuth();
           router.push('/auth/login');
           return;
         }
@@ -234,11 +231,11 @@ export default function ProfileDetailPage() {
           try {
             // Set profileId in localStorage so API context headers will use it
             const brandsResponse = await api.get(endpoints.brands());
-            
+
             // API returns PagedResult<BrandResponseDto>
             const brandsData = brandsResponse.data as any;
             const brandsList = brandsData?.data || brandsData || [];
-            
+
             // Map backend response to frontend format
             const mappedBrands: Brand[] = brandsList.map((brand: any) => ({
               id: brand.id,
@@ -247,7 +244,7 @@ export default function ProfileDetailPage() {
               status: brand.isDeleted ? 'Deleted' : 'Active',
               createdAt: brand.createdAt || new Date().toISOString()
             }));
-            
+
             setBrands(mappedBrands);
           } finally {
             // Restore original profileId

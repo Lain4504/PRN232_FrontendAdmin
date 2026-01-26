@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, User, CreditCard, Building, Share2, Users, Eye } from "lucide-react";
 import { api, endpoints, Profile, Subscription } from "@/lib/api";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { DataTable } from "@/components/ui/data-table";
@@ -226,14 +225,14 @@ export default function UserDetailPage() {
     const fetchUserData = async () => {
       try {
         // Fetch user details - use the search endpoint with proper params
-        const userResponse = await api.get(endpoints.userSearch({ 
-          searchTerm: userId, 
-          pageSize: 100 
+        const userResponse = await api.get(endpoints.userSearch({
+          searchTerm: userId,
+          pageSize: 100
         })).catch(err => {
           console.error('User search error:', err);
           return { data: { data: [] } };
         });
-        
+
         const userData = userResponse.data as any;
         // API returns GenericResponse<PagedResult<UserListDto>>
         const users = userData?.data || [];

@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { api, endpoints, Payment } from "@/lib/api";
+import { authStore } from "@/lib/auth-store";
 import { ColumnDef } from "@tanstack/react-table";
-import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import React from "react";
@@ -35,9 +35,9 @@ const formatCurrency = (amount: number, currency: string = "USD") => {
     "VND": "VND",
     "EUR": "EUR",
   };
-  
+
   const mappedCurrency = currencyMap[currency.toUpperCase()] || currency.toUpperCase();
-  
+
   try {
     if (mappedCurrency === "USD") {
       return new Intl.NumberFormat("en-US", {
@@ -81,7 +81,7 @@ const formatDateTime = (date: string) => {
 
 // Helper function to get status badge
 const getStatusBadge = (status: string | number) => {
-  const statusStr = typeof status === "number" 
+  const statusStr = typeof status === "number"
     ? ["Pending", "Success", "Failed", "Refunded"][status] || "Unknown"
     : status;
 
@@ -437,8 +437,7 @@ export default function PaymentsPage() {
 
   const handleLogout = async () => {
     try {
-      const supabase = createClient();
-      await supabase.auth.signOut();
+      authStore.clearAuth();
       toast.success("Logged out successfully");
       router.push('/auth/login');
     } catch (error) {

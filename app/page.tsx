@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { api, endpoints, User } from "@/lib/api";
+import { authStore } from "@/lib/auth-store";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { useRouter as useNextRouter } from "next/navigation";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
@@ -213,8 +213,7 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     try {
-      const supabase = createClient();
-      await supabase.auth.signOut();
+      authStore.clearAuth();
       toast.success("Logged out successfully");
       router.push('/auth/login');
     } catch (error) {

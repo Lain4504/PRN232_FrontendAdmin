@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { League_Spartan } from "next/font/google";
 import "./globals.css";
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 
 const leagueSpartan = League_Spartan({
   subsets: ["latin"],
