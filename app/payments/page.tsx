@@ -222,7 +222,7 @@ export default function PaymentsPage() {
               <div>
                 <CardTitle className="text-xl">Giao dịch</CardTitle>
                 <CardDescription className="mt-1">
-                  Lịch sử tất cả các khoản thanh toán được xử lý qua hệ thống Omniadly.
+                  Lịch sử tất cả các khoản thanh toán được xử lý qua hệ thống OmniAdly.
                 </CardDescription>
               </div>
               <Badge variant="secondary" className="bg-primary/5 text-primary border-primary/10 px-3 py-1">

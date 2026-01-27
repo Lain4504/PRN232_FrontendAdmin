@@ -122,7 +122,7 @@ export default function Dashboard() {
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-bold tracking-tight">Tổng quan</h1>
           <p className="text-muted-foreground font-light">
-            Chào mừng bạn đến với trang quản trị Omniadly. Theo dõi và quản lý sự phát triển của hệ thống.
+            Chào mừng bạn đến với trang quản trị OmniAdly. Theo dõi và quản lý sự phát triển của hệ thống.
           </p>
         </div>
 
@@ -178,7 +178,7 @@ export default function Dashboard() {
               <div>
                 <CardTitle className="text-xl">Danh mục người dùng</CardTitle>
                 <CardDescription className="mt-1">
-                  Danh sách đầy đủ tất cả người dùng Omniadly và trạng thái tài khoản.
+                  Danh sách đầy đủ tất cả người dùng OmniAdly và trạng thái tài khoản.
                 </CardDescription>
               </div>
               <Button size="sm" variant="outline" onClick={() => toast.info("Đang xuất dữ liệu...")}>

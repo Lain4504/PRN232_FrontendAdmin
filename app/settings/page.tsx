@@ -14,7 +14,7 @@ export default function SettingsPage() {
             <div className="flex flex-col gap-8 max-w-4xl mx-auto">
                 <div className="flex flex-col gap-2">
                     <h1 className="text-3xl font-bold tracking-tight text-foreground">Cài đặt hệ thống</h1>
-                    <p className="text-muted-foreground">Cấu hình hành vi bảng quản trị Omniadly và các tùy chọn hệ thống.</p>
+                    <p className="text-muted-foreground">Cấu hình hành vi bảng quản trị OmniAdly và các tùy chọn hệ thống.</p>
                 </div>
 
                 <div className="flex flex-col gap-6">

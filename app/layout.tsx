@@ -24,8 +24,8 @@ const firaMono = Fira_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bảng Quản trị Omniadly",
-  description: "Hệ thống Quản trị Mạng xã hội Omniadly",
+  title: "Bảng Quản trị OmniAdly",
+  description: "Hệ thống Quản trị Mạng xã hội OmniAdly",
 };
 
 export default function RootLayout({

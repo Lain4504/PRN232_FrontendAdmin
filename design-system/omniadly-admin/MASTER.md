@@ -6,7 +6,7 @@
 
 ---
 
-**Project:** Omniadly Admin
+**Project:** OmniAdly Admin
 **Generated:** 2026-01-26 21:14:55
 **Category:** Analytics Dashboard
 
