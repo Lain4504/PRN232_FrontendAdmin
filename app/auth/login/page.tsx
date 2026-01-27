@@ -19,8 +19,8 @@ export default function Page() {
     <AuthSplitLayout
       title="Chào mừng quay trở lại"
       subtitle="Đăng nhập vào tài khoản quản trị của bạn"
-      quote="Hệ thống Quản trị AISAM giúp quản lý và tối ưu hóa các chiến dịch truyền thông xã hội một cách hiệu quả và an toàn."
-      author="@Đội ngũ quản trị AISAM"
+      quote="Hệ thống Quản trị Omniadly giúp quản lý và tối ưu hóa các chiến dịch truyền thông xã hội một cách hiệu quả và an toàn."
+      author="@Đội ngũ quản trị Omniadly"
     >
       <LoginForm />
     </AuthSplitLayout>

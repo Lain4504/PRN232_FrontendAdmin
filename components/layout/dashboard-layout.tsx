@@ -67,7 +67,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                             <LayoutDashboard className="h-5 w-5" />
                         </div>
                         <div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden overflow-hidden">
-                            <span className="font-bold text-sm tracking-tight truncate">QUẢN TRỊ AISAM</span>
+                            <span className="font-bold text-sm tracking-tight truncate">QUẢN TRỊ OMNIADLY</span>
                             <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-[0.2em]">Quản trị</span>
                         </div>
                     </SidebarHeader>
@@ -133,7 +133,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                                 <DropdownMenuContent align="end" className="w-60 mt-2 shadow-2xl border-border/40 p-1.5 font-sans" sideOffset={8}>
                                     <DropdownMenuLabel className="font-normal px-2 py-3">
                                         <div className="flex flex-col space-y-1">
-                                            <p className="text-sm font-bold tracking-tight">{adminUser?.fullName || "Quản trị viên AISAM"}</p>
+                                            <p className="text-sm font-bold tracking-tight">{adminUser?.fullName || "Quản trị viên Omniadly"}</p>
                                             <p className="text-[11px] text-muted-foreground font-mono">{adminUser?.email}</p>
                                         </div>
                                     </DropdownMenuLabel>

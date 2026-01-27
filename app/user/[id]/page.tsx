@@ -263,11 +263,7 @@ export default function UserDetailPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <Button onClick={() => toast.info("Tính năng sắp ra mắt")}>
-                Chỉnh sửa tài khoản
-              </Button>
-            </div>
+
           </div>
         </div>
 

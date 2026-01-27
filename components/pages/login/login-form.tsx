@@ -177,7 +177,7 @@ export function LoginForm({
       <div className="flex flex-col space-y-2 text-center mb-2">
         <h1 className="text-2xl font-semibold tracking-tight">Hệ thống Quản trị</h1>
         <p className="text-sm text-muted-foreground font-light px-8">
-          Nhập thông tin xác thực của bạn để truy cập bảng quản trị AISAM.
+          Nhập thông tin xác thực của bạn để truy cập bảng quản trị Omniadly.
         </p>
       </div>
 
@@ -198,7 +198,7 @@ export function LoginForm({
                       <Input
                         {...field}
                         type="email"
-                        placeholder="admin@aisam.com"
+                        placeholder="admin@omniadly.com"
                         className="pl-10 h-12 bg-muted/30 border-border/50 focus:bg-background transition-all"
                       />
                     </div>
@@ -298,7 +298,7 @@ export function LoginForm({
       </div>
 
       <p className="text-center text-[11px] text-muted-foreground leading-relaxed font-light">
-        Hệ thống Quản trị AISAM Toàn cầu. Bằng cách tiếp tục, bạn đồng ý với
+        Hệ thống Quản trị Omniadly Toàn cầu. Bằng cách tiếp tục, bạn đồng ý với
         <Link href="#" className="underline underline-offset-2 mx-1 hover:text-primary transition-colors">Chính sách Bảo mật Nội bộ</Link>.
       </p>
     </div>

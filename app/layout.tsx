@@ -24,8 +24,8 @@ const firaMono = Fira_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bảng Quản trị AISAM",
-  description: "Hệ thống Quản trị Mạng xã hội AISAM",
+  title: "Bảng Quản trị Omniadly",
+  description: "Hệ thống Quản trị Mạng xã hội Omniadly",
 };
 
 export default function RootLayout({

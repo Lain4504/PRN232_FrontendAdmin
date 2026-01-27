@@ -7,8 +7,8 @@ export function AuthSplitLayout({
   children,
   title = "Welcome back",
   subtitle = "Sign in to your account",
-  quote = "AISAM Admin helps manage and optimize social media campaigns efficiently and securely.",
-  author = "@AISAM Admin Team",
+  quote = "Omniadly Admin helps manage and optimize social media campaigns efficiently and securely.",
+  author = "@Omniadly Admin Team",
 }: {
   children: React.ReactNode;
   title?: string;
@@ -30,7 +30,7 @@ export function AuthSplitLayout({
                   <Sparkles className="absolute -top-1 -right-1 size-2.5 sm:size-3 text-primary animate-pulse" />
                 </div>
                 <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-                  AISAM Admin
+                  Omniadly Admin
                 </span>
               </div>
 
