@@ -31,12 +31,12 @@ interface NavItem {
 
 const mainNavItems: NavItem[] = [
   {
-    title: "Overview",
+    title: "Tổng quan",
     url: "/",
     icon: BarChart3,
   },
   {
-    title: "Payments",
+    title: "Thanh toán",
     url: "/payments",
     icon: CreditCard,
   },
@@ -47,7 +47,7 @@ export function AdminSidebar() {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Management</SidebarGroupLabel>
+      <SidebarGroupLabel>Quản lý</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {mainNavItems.map((item) => {

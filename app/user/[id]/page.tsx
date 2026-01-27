@@ -16,24 +16,35 @@ import { cn } from "@/lib/utils";
 
 // Mapping functions for profileType and status
 const mapProfileType = (type: number | string): string => {
-  if (typeof type === 'string') return type;
+  if (typeof type === 'string') {
+    if (type === 'Free') return 'Miễn phí';
+    if (type === 'Basic') return 'Cơ bản';
+    if (type === 'Pro') return 'Chuyên nghiệp';
+    return type;
+  }
   const typeMap: Record<number, string> = {
-    0: 'Free',
-    1: 'Basic',
-    2: 'Pro'
+    0: 'Miễn phí',
+    1: 'Cơ bản',
+    2: 'Chuyên nghiệp'
   };
-  return typeMap[type] || 'Unknown';
+  return typeMap[type] || 'Không xác định';
 };
 
 const mapProfileStatus = (status: number | string): string => {
-  if (typeof status === 'string') return status;
+  if (typeof status === 'string') {
+    if (status === 'Pending') return 'Đang chờ';
+    if (status === 'Active') return 'Hoạt động';
+    if (status === 'Suspended') return 'Bị tạm dừng';
+    if (status === 'Cancelled') return 'Đã hủy';
+    return status;
+  }
   const statusMap: Record<number, string> = {
-    0: 'Pending',
-    1: 'Active',
-    2: 'Suspended',
-    3: 'Cancelled'
+    0: 'Đang chờ',
+    1: 'Hoạt động',
+    2: 'Bị tạm dừng',
+    3: 'Đã hủy'
   };
-  return statusMap[status] || 'Unknown';
+  return statusMap[status] || 'Không xác định';
 };
 
 interface UserDetail {
@@ -58,7 +69,7 @@ export default function UserDetailPage() {
   const profileColumns: ColumnDef<Profile>[] = [
     {
       accessorKey: "name",
-      header: "Profile",
+      header: "Hồ sơ",
       cell: ({ row }) => (
         <div className="flex flex-col">
           <span className="font-medium text-foreground">{row.original.name}</span>
@@ -68,7 +79,7 @@ export default function UserDetailPage() {
     },
     {
       accessorKey: "profileType",
-      header: "Plan",
+      header: "Gói dịch vụ",
       cell: ({ row }) => {
         const type = row.original.profileType;
         return (
@@ -86,14 +97,14 @@ export default function UserDetailPage() {
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: "Trạng thái",
       cell: ({ row }) => {
         const status = row.original.status;
         return (
           <Badge
             className={cn(
               "font-semibold",
-              status === "Active" ? "bg-success/10 text-success border-success/20" : "bg-warning/10 text-warning border-warning/20"
+              status === "Hoạt động" || status === "Active" ? "bg-success/10 text-success border-success/20" : "bg-warning/10 text-warning border-warning/20"
             )}
             variant="outline"
           >
@@ -104,16 +115,16 @@ export default function UserDetailPage() {
     },
     {
       accessorKey: "companyName",
-      header: "Company",
-      cell: ({ row }) => row.original.companyName || <span className="text-muted-foreground font-light italic text-xs">Unspecified</span>
+      header: "Công ty",
+      cell: ({ row }) => row.original.companyName || <span className="text-muted-foreground font-light italic text-xs">Chưa xác định</span>
     },
     {
       accessorKey: "createdAt",
-      header: "Created",
+      header: "Ngày tạo",
       cell: ({ row }) => (
         <span className="text-sm text-muted-foreground">
-          {new Date(row.getValue("createdAt")).toLocaleDateString("en-US", {
-            month: 'short',
+          {new Date(row.getValue("createdAt")).toLocaleDateString("vi-VN", {
+            month: 'long',
             day: 'numeric',
             year: 'numeric'
           })}
@@ -122,7 +133,7 @@ export default function UserDetailPage() {
     },
     {
       id: "actions",
-      header: () => <div className="text-right">Actions</div>,
+      header: () => <div className="text-right">Hành động</div>,
       cell: ({ row }) => (
         <div className="text-right">
           <Button
@@ -131,7 +142,7 @@ export default function UserDetailPage() {
             className="group hover:bg-primary/5 hover:text-primary transition-all gap-1.5"
             onClick={() => router.push(`/user/${userId}/profile/${row.original.id}`)}
           >
-            Details
+            Chi tiết
             <ExternalLink className="h-3.5 w-3.5" />
           </Button>
         </div>
@@ -183,7 +194,7 @@ export default function UserDetailPage() {
 
       } catch (error) {
         console.error("Failed to fetch user data:", error);
-        toast.error("Failed to load user data");
+        toast.error("Không thể tải dữ liệu người dùng");
       } finally {
         setLoading(false);
       }
@@ -209,12 +220,12 @@ export default function UserDetailPage() {
           <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
             <User className="h-10 w-10 text-muted-foreground" />
           </div>
-          <h1 className="text-2xl font-bold">User Not Found</h1>
+          <h1 className="text-2xl font-bold">Không tìm thấy người dùng</h1>
           <p className="text-muted-foreground max-w-sm">
-            We couldn't find a user with the ID you provided. They might have been deleted or the ID is incorrect.
+            Chúng tôi không thể tìm thấy người dùng với ID bạn cung cấp. Họ có thể đã bị xóa hoặc ID không chính xác.
           </p>
           <Button onClick={() => router.push("/")} variant="outline">
-            Return to Directory
+            Quay lại danh sách
           </Button>
         </div>
       </DashboardLayout>
@@ -233,7 +244,7 @@ export default function UserDetailPage() {
             onClick={() => router.push("/")}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            User Directory
+            Danh mục người dùng
           </Button>
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -246,15 +257,15 @@ export default function UserDetailPage() {
                 <div className="flex items-center gap-2 mt-1">
                   <Badge variant="outline" className="font-normal text-muted-foreground">ID: {user.id}</Badge>
                   <Badge className="bg-primary/20 text-primary border-none hover:bg-primary/25">
-                    {user.role === "Admin" ? "System Admin" : "User Account"}
+                    {user.role === "Admin" ? "Quản trị viên hệ thống" : "Tài khoản khách hàng"}
                   </Badge>
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <Button onClick={() => toast.info("Functionality coming soon")}>
-                Edit Account
+              <Button onClick={() => toast.info("Tính năng sắp ra mắt")}>
+                Chỉnh sửa tài khoản
               </Button>
             </div>
           </div>
@@ -269,8 +280,8 @@ export default function UserDetailPage() {
                   <Activity className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Account Status</p>
-                  <p className="text-xl font-bold">Active</p>
+                  <p className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Trạng thái tài khoản</p>
+                  <p className="text-xl font-bold">Hoạt động</p>
                 </div>
               </div>
             </CardContent>
@@ -283,8 +294,8 @@ export default function UserDetailPage() {
                   <Calendar className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Join Date</p>
-                  <p className="text-xl font-bold">{new Date(user.createdAt).toLocaleDateString()}</p>
+                  <p className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Ngày tham gia</p>
+                  <p className="text-xl font-bold">{new Date(user.createdAt).toLocaleDateString("vi-VN")}</p>
                 </div>
               </div>
             </CardContent>
@@ -297,8 +308,8 @@ export default function UserDetailPage() {
                   <Shield className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Security Level</p>
-                  <p className="text-xl font-bold">Standard</p>
+                  <p className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Mức độ bảo mật</p>
+                  <p className="text-xl font-bold">Tiêu chuẩn</p>
                 </div>
               </div>
             </CardContent>
@@ -312,7 +323,7 @@ export default function UserDetailPage() {
             <Card className="bg-card/50 border-border/50 overflow-hidden">
               <CardHeader className="bg-muted/50 border-b border-border/30">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Mail className="h-4 w-4" /> Account Details
+                  <Mail className="h-4 w-4" /> Chi tiết tài khoản
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
@@ -321,7 +332,7 @@ export default function UserDetailPage() {
                   <p className="text-sm truncate">{user.email}</p>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-muted-foreground uppercase">Role</label>
+                  <label className="text-[11px] font-bold text-muted-foreground uppercase">Vai trò</label>
                   <p className="text-sm">{user.role}</p>
                 </div>
                 <div className="space-y-1">
@@ -338,13 +349,13 @@ export default function UserDetailPage() {
               <CardHeader className="bg-card/50 border-b border-border/30 px-6 py-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-xl">Associated Profiles</CardTitle>
+                    <CardTitle className="text-xl">Hồ sơ liên kết</CardTitle>
                     <CardDescription className="mt-1">
-                      Subscription profiles and social management containers for this user.
+                      Các hồ sơ đăng ký và trình quản lý mạng xã hội của người dùng này.
                     </CardDescription>
                   </div>
                   <Badge variant="secondary" className="bg-primary/5 text-primary border-primary/10">
-                    {profiles.length} Profiles
+                    {profiles.length} Hồ sơ
                   </Badge>
                 </div>
               </CardHeader>
@@ -353,7 +364,7 @@ export default function UserDetailPage() {
                   {profiles.length === 0 ? (
                     <div className="py-12 flex flex-col items-center justify-center text-center gap-2 opacity-60">
                       <Activity className="h-10 w-10 text-muted-foreground" />
-                      <p>No managed profiles linked to this account yet.</p>
+                      <p>Chưa có hồ sơ quản lý nào được liên kết với tài khoản này.</p>
                     </div>
                   ) : (
                     <DataTable

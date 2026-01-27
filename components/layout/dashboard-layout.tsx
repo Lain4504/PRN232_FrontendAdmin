@@ -53,7 +53,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
     const handleLogout = () => {
         authStore.clearAuth();
-        toast.success("Logged out successfully");
+        toast.success("Đăng xuất thành công");
         router.push("/auth/login");
     };
 
@@ -67,8 +67,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                             <LayoutDashboard className="h-5 w-5" />
                         </div>
                         <div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden overflow-hidden">
-                            <span className="font-bold text-sm tracking-tight truncate">AISAM ADMIN</span>
-                            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-[0.2em]">Management</span>
+                            <span className="font-bold text-sm tracking-tight truncate">QUẢN TRỊ AISAM</span>
+                            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-[0.2em]">Quản trị</span>
                         </div>
                     </SidebarHeader>
 
@@ -79,9 +79,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     <SidebarFooter className="p-2 border-t border-border/50">
                         <SidebarMenu>
                             <SidebarMenuItem>
-                                <SidebarMenuButton tooltip="Help Center" className="text-muted-foreground hover:text-foreground">
+                                <SidebarMenuButton tooltip="Trung tâm hỗ trợ" className="text-muted-foreground hover:text-foreground">
                                     <HelpCircle className="h-4 w-4" />
-                                    <span>Help Center</span>
+                                    <span>Trung tâm hỗ trợ</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
@@ -99,7 +99,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                             <div className="relative hidden md:flex items-center">
                                 <Search className="absolute left-3 h-4 w-4 text-muted-foreground/60" />
                                 <Input
-                                    placeholder="Universal Search..."
+                                    placeholder="Tìm kiếm..."
                                     className="pl-9 w-64 lg:w-96 h-9 bg-muted/40 border-none focus-visible:ring-1 focus-visible:ring-primary/40 transition-all rounded-full"
                                 />
                             </div>
@@ -123,7 +123,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                                             </AvatarFallback>
                                         </Avatar>
                                         <div className="hidden sm:flex flex-col items-start text-left leading-tight">
-                                            <span className="text-xs font-bold leading-none">{adminUser?.fullName || "Administrator"}</span>
+                                            <span className="text-xs font-bold leading-none">{adminUser?.fullName || "Quản trị viên"}</span>
                                             <span className="text-[10px] text-muted-foreground mt-0.5 truncate max-w-[100px]">
                                                 {adminUser?.email}
                                             </span>
@@ -133,7 +133,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                                 <DropdownMenuContent align="end" className="w-60 mt-2 shadow-2xl border-border/40 p-1.5 font-sans" sideOffset={8}>
                                     <DropdownMenuLabel className="font-normal px-2 py-3">
                                         <div className="flex flex-col space-y-1">
-                                            <p className="text-sm font-bold tracking-tight">{adminUser?.fullName || "AISAM Administrator"}</p>
+                                            <p className="text-sm font-bold tracking-tight">{adminUser?.fullName || "Quản trị viên AISAM"}</p>
                                             <p className="text-[11px] text-muted-foreground font-mono">{adminUser?.email}</p>
                                         </div>
                                     </DropdownMenuLabel>
@@ -141,17 +141,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                                     <div className="py-1">
                                         <DropdownMenuItem onClick={() => router.push("/profile")} className="rounded-md gap-3 cursor-pointer py-2">
                                             <UserIcon className="h-4 w-4 text-muted-foreground" />
-                                            <span className="text-sm">Account Settings</span>
+                                            <span className="text-sm">Cài đặt tài khoản</span>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => router.push("/settings")} className="rounded-md gap-3 cursor-pointer py-2">
                                             <Settings className="h-4 w-4 text-muted-foreground" />
-                                            <span className="text-sm">Global Settings</span>
+                                            <span className="text-sm">Cài đặt hệ thống</span>
                                         </DropdownMenuItem>
                                     </div>
                                     <DropdownMenuSeparator className="opacity-50" />
                                     <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive focus:bg-destructive/5 rounded-md gap-3 cursor-pointer py-2 mt-1">
                                         <LogOut className="h-4 w-4" />
-                                        <span className="text-sm font-semibold">Terminate Session</span>
+                                        <span className="text-sm font-semibold">Đăng xuất</span>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>

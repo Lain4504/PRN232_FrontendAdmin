@@ -40,28 +40,28 @@ const getStatusBadge = (status: string | number) => {
       return (
         <Badge variant="outline" className="bg-success/10 text-success border-success/20 font-medium">
           <CheckCircle2 className="h-3 w-3 mr-1" />
-          Success
+          Thành công
         </Badge>
       );
     case "Failed":
       return (
         <Badge variant="outline" className="bg-error/10 text-error border-error/20 font-medium">
           <XCircle className="h-3 w-3 mr-1" />
-          Failed
+          Thất bại
         </Badge>
       );
     case "Pending":
       return (
         <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20 font-medium">
           <Clock className="h-3 w-3 mr-1" />
-          Pending
+          Đang xử lý
         </Badge>
       );
     case "Refunded":
       return (
         <Badge variant="outline" className="bg-muted text-muted-foreground border-border font-medium">
           <RotateCcw className="h-3 w-3 mr-1" />
-          Refunded
+          Đã hoàn tiền
         </Badge>
       );
     default:
@@ -79,7 +79,7 @@ export default function PaymentsPage() {
   const paymentColumns: ColumnDef<Payment>[] = [
     {
       accessorKey: "userEmail",
-      header: "User",
+      header: "Người dùng",
       cell: ({ row }) => (
         <div className="flex flex-col py-1">
           <span className="font-medium text-foreground">{row.original.userEmail || "Guest"}</span>
@@ -89,14 +89,14 @@ export default function PaymentsPage() {
             className="h-auto p-0 text-[11px] text-muted-foreground hover:text-primary w-fit transition-colors"
             onClick={() => router.push(`/user/${row.original.userId}`)}
           >
-            Manage User →
+            Quản lý người dùng →
           </Button>
         </div>
       ),
     },
     {
       accessorKey: "amount",
-      header: "Amount",
+      header: "Số tiền",
       cell: ({ row }) => (
         <div className="font-bold text-base text-foreground">
           {formatCurrency(row.original.amount, row.original.currency)}
@@ -105,12 +105,12 @@ export default function PaymentsPage() {
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: "Trạng thái",
       cell: ({ row }) => getStatusBadge(row.original.status),
     },
     {
       accessorKey: "paymentMethod",
-      header: "Method",
+      header: "Phương thức",
       cell: ({ row }) => (
         <Badge variant="secondary" className="bg-muted/50 text-muted-foreground font-normal border-none">
           {row.original.paymentMethod || "N/A"}
@@ -119,17 +119,17 @@ export default function PaymentsPage() {
     },
     {
       accessorKey: "createdAt",
-      header: "Date",
+      header: "Ngày",
       cell: ({ row }) => (
         <div className="flex flex-col text-sm text-muted-foreground whitespace-nowrap">
-          <span>{new Date(row.original.createdAt).toLocaleDateString()}</span>
-          <span className="text-[10px] opacity-60 font-light">{new Date(row.original.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          <span>{new Date(row.original.createdAt).toLocaleDateString("vi-VN")}</span>
+          <span className="text-[10px] opacity-60 font-light">{new Date(row.original.createdAt).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
       ),
     },
     {
       id: "actions",
-      header: () => <div className="text-right">Reference</div>,
+      header: () => <div className="text-right">Tham chiếu</div>,
       cell: ({ row }) => (
         <div className="flex items-center justify-end gap-2">
           <Button
@@ -138,7 +138,7 @@ export default function PaymentsPage() {
             className="h-8 w-8 p-0 hover:bg-muted"
             onClick={() => {
               navigator.clipboard.writeText(row.original.id);
-              toast.success("ID copied");
+              toast.success("Đã sao chép ID");
             }}
           >
             <Copy className="h-3.5 w-3.5 text-muted-foreground" />
@@ -170,7 +170,7 @@ export default function PaymentsPage() {
         setPayments(paymentsResponse.data as any || []);
       } catch (error) {
         console.error("Failed to fetch payments:", error);
-        toast.error("Failed to fetch payments");
+        toast.error("Lấy danh sách thanh toán thất bại");
       } finally {
         setLoading(false);
       }
@@ -200,15 +200,15 @@ export default function PaymentsPage() {
       <div className="flex flex-col gap-8 pb-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <h1 className="text-3xl font-bold tracking-tight">Finance</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Tài chính</h1>
             <p className="text-muted-foreground font-light">
-              Track subscription payments and platform revenue.
+              Theo dõi các khoản thanh toán gói đăng ký và doanh thu nền tảng.
             </p>
           </div>
 
           <Card className="bg-primary shadow-lg shadow-primary/20 border-none text-primary-foreground min-w-[240px]">
             <CardContent className="p-4 flex flex-col gap-1">
-              <span className="text-[10px] uppercase font-bold tracking-wider opacity-70">Total Success Revenue</span>
+              <span className="text-[10px] uppercase font-bold tracking-wider opacity-70">Tổng doanh thu thành công</span>
               <div className="text-2xl font-bold">
                 {formatCurrency(totalRevenue, payments[0]?.currency || "VND")}
               </div>
@@ -220,13 +220,13 @@ export default function PaymentsPage() {
           <CardHeader className="bg-card/50 border-b border-border/30 px-6 py-5">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-xl">Transactions</CardTitle>
+                <CardTitle className="text-xl">Giao dịch</CardTitle>
                 <CardDescription className="mt-1">
-                  History of all payments processed through the AISAM engine.
+                  Lịch sử tất cả các khoản thanh toán được xử lý qua hệ thống AISAM.
                 </CardDescription>
               </div>
               <Badge variant="secondary" className="bg-primary/5 text-primary border-primary/10 px-3 py-1">
-                {payments.length} Transactions
+                {payments.length} Giao dịch
               </Badge>
             </div>
           </CardHeader>
@@ -237,9 +237,9 @@ export default function PaymentsPage() {
                   <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center">
                     <CreditCard className="h-7 w-7 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-semibold">No transactions yet</h3>
+                  <h3 className="text-lg font-semibold">Chưa có giao dịch nào</h3>
                   <p className="text-sm text-muted-foreground max-w-xs">
-                    When users start subscribing to plans, their payment history will appear here.
+                    Khi người dùng bắt đầu đăng ký các gói dịch vụ, lịch sử thanh toán của họ sẽ xuất hiện tại đây.
                   </p>
                 </div>
               ) : (

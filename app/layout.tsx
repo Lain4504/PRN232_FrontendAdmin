@@ -24,8 +24,8 @@ const firaMono = Fira_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AISAM Admin Dashboard",
-  description: "Admin dashboard for AISAM Social Media Management",
+  title: "Bảng Quản trị AISAM",
+  description: "Hệ thống Quản trị Mạng xã hội AISAM",
 };
 
 export default function RootLayout({
@@ -34,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="vi">
       <body
         className={`${plusJakartaSans.className} ${plusJakartaSans.variable} ${firaSans.variable} ${firaMono.variable} antialiased`}
         suppressHydrationWarning

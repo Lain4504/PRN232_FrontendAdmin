@@ -51,12 +51,12 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   filterColumn,
-  searchPlaceholder = "Quick search...",
+  searchPlaceholder = "Tìm kiếm nhanh...",
   pageSize = 10,
   className,
   loading = false,
-  emptyMessage = "No records found",
-  emptyDescription = "Adjust your filters or try a different search term.",
+  emptyMessage = "Không tìm thấy kết quả",
+  emptyDescription = "Hãy điều chỉnh bộ lọc hoặc thử từ khóa tìm kiếm khác.",
   showPagination = true,
   showSearch = true,
   showPageSize = true,
@@ -140,7 +140,7 @@ export function DataTable<TData, TValue>({
                 <SelectContent className="rounded-xl border-border/30">
                   {[5, 10, 20, 50].map((size) => (
                     <SelectItem key={size} value={String(size)} className="text-xs">
-                      {size} rows
+                      {size} dòng
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -209,9 +209,9 @@ export function DataTable<TData, TValue>({
       {showPagination && totalItems > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-2">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
-            Showing <span className="text-foreground">{table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}</span> to{" "}
-            <span className="text-foreground">{Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, totalItems)}</span> of{" "}
-            <span className="text-foreground">{totalItems}</span> entries
+            Hiển thị <span className="text-foreground">{table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}</span> đến{" "}
+            <span className="text-foreground">{Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, totalItems)}</span> trên{" "}
+            <span className="text-foreground">{totalItems}</span> kết quả
           </p>
 
           <div className="flex items-center gap-1 bg-muted/30 p-1.5 rounded-2xl border border-border/30">

@@ -15,8 +15,8 @@ export default function ProfilePage() {
         <DashboardLayout>
             <div className="flex flex-col gap-8 max-w-4xl mx-auto">
                 <div className="flex flex-col gap-2">
-                    <h1 className="text-3xl font-bold tracking-tight">Account Profile</h1>
-                    <p className="text-muted-foreground">Manage your administrative account details and preferences.</p>
+                    <h1 className="text-3xl font-bold tracking-tight">Hồ sơ tài khoản</h1>
+                    <p className="text-muted-foreground">Quản lý thông tin tài khoản quản trị và các tùy chọn của bạn.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -30,15 +30,15 @@ export default function ProfilePage() {
                                     </AvatarFallback>
                                 </Avatar>
                                 <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                                    <span className="text-white text-xs font-bold uppercase tracking-widest">Update</span>
+                                    <span className="text-white text-xs font-bold uppercase tracking-widest">Cập nhật</span>
                                 </div>
                             </div>
 
                             <div className="mt-6 text-center">
-                                <h2 className="text-xl font-bold">{user?.fullName || "Administrator"}</h2>
+                                <h2 className="text-xl font-bold">{user?.fullName || "Quản trị viên"}</h2>
                                 <div className="flex items-center justify-center gap-1.5 mt-1 text-primary">
                                     <ShieldCheck className="h-4 w-4" />
-                                    <span className="text-xs font-black uppercase tracking-[0.1em]">Verification Level 4</span>
+                                    <span className="text-xs font-black uppercase tracking-[0.1em]">Mức độ xác thực 4</span>
                                 </div>
                             </div>
 
@@ -47,7 +47,7 @@ export default function ProfilePage() {
                             <div className="w-full space-y-4">
                                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                                     <User className="h-4 w-4" />
-                                    <span>Role: {user?.role || "Admin"}</span>
+                                    <span>Vai trò: {user?.role || "Quản trị viên"}</span>
                                 </div>
                                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                                     <Mail className="h-4 w-4" />
@@ -60,8 +60,8 @@ export default function ProfilePage() {
                     <div className="md:col-span-2 flex flex-col gap-6">
                         <Card className="border-border/50 bg-card/30">
                             <CardHeader>
-                                <CardTitle className="text-lg">Security Information</CardTitle>
-                                <CardDescription>Update your password and security settings.</CardDescription>
+                                <CardTitle className="text-lg">Thông tin bảo mật</CardTitle>
+                                <CardDescription>Cập nhật mật khẩu và cài đặt bảo mật.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="p-4 rounded-xl border border-border/40 bg-background/50 flex items-center justify-between">
@@ -70,11 +70,11 @@ export default function ProfilePage() {
                                             <Shield className="h-5 w-5" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold">Multi-Factor Authentication</p>
-                                            <p className="text-xs text-muted-foreground">Enabled via Authenticator App</p>
+                                            <p className="text-sm font-bold">Xác thực nhiều yếu tố</p>
+                                            <p className="text-xs text-muted-foreground">Đã bật qua ứng dụng Authenticator</p>
                                         </div>
                                     </div>
-                                    <Button variant="outline" size="sm" className="rounded-lg">Manage</Button>
+                                    <Button variant="outline" size="sm" className="rounded-lg">Quản lý</Button>
                                 </div>
 
                                 <div className="p-4 rounded-xl border border-border/40 bg-background/50 flex items-center justify-between">
@@ -83,23 +83,23 @@ export default function ProfilePage() {
                                             <Calendar className="h-5 w-5" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold">Last Login Session</p>
-                                            <p className="text-xs text-muted-foreground">Today at 14:45 • IP: 192.168.1.15</p>
+                                            <p className="text-sm font-bold">Phiên đăng nhập cuối</p>
+                                            <p className="text-xs text-muted-foreground">Hôm nay lúc 14:45 • IP: 192.168.1.15</p>
                                         </div>
                                     </div>
-                                    <Button variant="ghost" size="sm" className="text-xs font-bold text-primary hover:bg-primary/5">View History</Button>
+                                    <Button variant="ghost" size="sm" className="text-xs font-bold text-primary hover:bg-primary/5">Xem lịch sử</Button>
                                 </div>
                             </CardContent>
                         </Card>
 
                         <Card className="border-border/50 bg-card/30">
                             <CardHeader>
-                                <CardTitle className="text-lg">Danger Zone</CardTitle>
-                                <CardDescription>Sensitive administrative actions.</CardDescription>
+                                <CardTitle className="text-lg">Vùng nguy hiểm</CardTitle>
+                                <CardDescription>Các hành động quản trị nhạy cảm.</CardDescription>
                             </CardHeader>
                             <CardContent className="flex flex-col sm:flex-row gap-4">
-                                <Button variant="destructive" className="flex-1 rounded-xl font-bold shadow-lg shadow-destructive/10">Revoke All Access Tokens</Button>
-                                <Button variant="outline" className="flex-1 rounded-xl font-bold">Contact Root Admin</Button>
+                                <Button variant="destructive" className="flex-1 rounded-xl font-bold shadow-lg shadow-destructive/10">Thu hồi tất cả mã truy cập</Button>
+                                <Button variant="outline" className="flex-1 rounded-xl font-bold">Liên hệ Quản trị viên cấp cao</Button>
                             </CardContent>
                         </Card>
                     </div>

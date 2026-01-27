@@ -17,24 +17,35 @@ import { cn } from "@/lib/utils";
 
 // Mapping functions for profileType and status
 const mapProfileType = (type: number | string): string => {
-  if (typeof type === 'string') return type;
+  if (typeof type === 'string') {
+    if (type === 'Free') return 'Miễn phí';
+    if (type === 'Basic') return 'Cơ bản';
+    if (type === 'Pro') return 'Chuyên nghiệp';
+    return type;
+  }
   const typeMap: Record<number, string> = {
-    0: 'Free',
-    1: 'Basic',
-    2: 'Pro'
+    0: 'Miễn phí',
+    1: 'Cơ bản',
+    2: 'Chuyên nghiệp'
   };
-  return typeMap[type] || 'Unknown';
+  return typeMap[type] || 'Không xác định';
 };
 
 const mapProfileStatus = (status: number | string): string => {
-  if (typeof status === 'string') return status;
+  if (typeof status === 'string') {
+    if (status === 'Pending') return 'Đang chờ';
+    if (status === 'Active') return 'Hoạt động';
+    if (status === 'Suspended') return 'Bị tạm dừng';
+    if (status === 'Cancelled') return 'Đã hủy';
+    return status;
+  }
   const statusMap: Record<number, string> = {
-    0: 'Pending',
-    1: 'Active',
-    2: 'Suspended',
-    3: 'Cancelled'
+    0: 'Đang chờ',
+    1: 'Hoạt động',
+    2: 'Bị tạm dừng',
+    3: 'Đã hủy'
   };
-  return statusMap[status] || 'Unknown';
+  return statusMap[status] || 'Không xác định';
 };
 
 const formatPlatformName = (platform: string): string => {
@@ -85,29 +96,29 @@ export default function ProfileDetailPage() {
   const brandColumns: ColumnDef<Brand>[] = [
     {
       accessorKey: "name",
-      header: "Brand Name",
+      header: "Tên thương hiệu",
       cell: ({ row }) => <span className="font-medium text-foreground">{row.original.name}</span>
     },
     {
       accessorKey: "description",
-      header: "Description",
+      header: "Mô tả",
       cell: ({ row }) => <span className="text-muted-foreground text-sm line-clamp-1 max-w-[300px]">{row.original.description || "—"}</span>
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: "Trạng thái",
       cell: ({ row }) => (
         <Badge variant="outline" className={cn(
           "font-semibold",
-          row.original.status === "Active" ? "bg-success/10 text-success border-success/20" : "bg-muted text-muted-foreground border-transparent"
+          row.original.status === "Hoạt động" || row.original.status === "Active" ? "bg-success/10 text-success border-success/20" : "bg-muted text-muted-foreground border-transparent"
         )}>
-          {row.original.status}
+          {row.original.status === "Active" ? "Hoạt động" : (row.original.status === "Active" ? "Hoạt động" : row.original.status)}
         </Badge>
       ),
     },
     {
       accessorKey: "createdAt",
-      header: "Created",
+      header: "Ngày tạo",
       cell: ({ row }) => <span className="text-sm text-muted-foreground">{new Date(row.original.createdAt).toLocaleDateString()}</span>
     },
   ];
@@ -115,7 +126,7 @@ export default function ProfileDetailPage() {
   const socialAccountColumns: ColumnDef<SocialAccount>[] = [
     {
       accessorKey: "platform",
-      header: "Platform",
+      header: "Nền tảng",
       cell: ({ row }) => (
         <Badge variant="secondary" className="bg-muted font-medium">
           {row.original.platform}
@@ -124,12 +135,12 @@ export default function ProfileDetailPage() {
     },
     {
       accessorKey: "username",
-      header: "Username",
+      header: "Tên đăng nhập",
       cell: ({ row }) => <span className="font-mono text-xs">{row.original.username}</span>
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: "Trạng thái",
       cell: ({ row }) => (
         <Badge variant="outline" className={cn(
           "font-semibold",
@@ -141,7 +152,7 @@ export default function ProfileDetailPage() {
     },
     {
       accessorKey: "createdAt",
-      header: "Linked On",
+      header: "Ngày liên kết",
       cell: ({ row }) => <span className="text-sm text-muted-foreground">{new Date(row.original.createdAt).toLocaleDateString()}</span>
     },
   ];
@@ -149,22 +160,22 @@ export default function ProfileDetailPage() {
   const teamColumns: ColumnDef<Team>[] = [
     {
       accessorKey: "name",
-      header: "Team Name",
+      header: "Tên đội ngũ",
       cell: ({ row }) => <span className="font-medium text-foreground">{row.original.name}</span>
     },
     {
       accessorKey: "memberCount",
-      header: "Members",
+      header: "Thành viên",
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5">
           <Users className="h-3.5 w-3.5 text-muted-foreground" />
-          <span>{row.original.memberCount} members</span>
+          <span>{row.original.memberCount} thành viên</span>
         </div>
       )
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: "Trạng thái",
       cell: ({ row }) => (
         <Badge variant="outline" className={cn(
           "font-semibold",
@@ -176,7 +187,7 @@ export default function ProfileDetailPage() {
     },
     {
       accessorKey: "createdAt",
-      header: "Founded",
+      header: "Ngày thành lập",
       cell: ({ row }) => <span className="text-sm text-muted-foreground">{new Date(row.original.createdAt).toLocaleDateString()}</span>
     },
   ];
@@ -243,7 +254,7 @@ export default function ProfileDetailPage() {
         }
       } catch (error) {
         console.error("Failed to fetch profile data:", error);
-        toast.error("Failed to load profile data");
+        toast.error("Không thể tải dữ liệu hồ sơ");
       } finally {
         setLoading(false);
       }
@@ -269,12 +280,12 @@ export default function ProfileDetailPage() {
           <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
             <User className="h-10 w-10 text-muted-foreground" />
           </div>
-          <h1 className="text-2xl font-bold">Profile Not Found</h1>
+          <h1 className="text-2xl font-bold">Không tìm thấy hồ sơ</h1>
           <p className="text-muted-foreground max-w-sm">
-            We couldn't find the requested profile for this user account.
+            Chúng tôi không thể tìm thấy hồ sơ theo yêu cầu của tài khoản người dùng này.
           </p>
           <Button onClick={() => router.push(`/user/${userId}`)} variant="outline">
-            Back to User Details
+            Quay lại chi tiết người dùng
           </Button>
         </div>
       </DashboardLayout>
@@ -293,7 +304,7 @@ export default function ProfileDetailPage() {
             onClick={() => router.push(`/user/${userId}`)}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            User Details
+            Chi tiết người dùng
           </Button>
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -305,12 +316,12 @@ export default function ProfileDetailPage() {
               <div className="flex flex-col">
                 <h1 className="text-3xl font-bold tracking-tight">{profile.name}</h1>
                 <div className="flex items-center gap-2 mt-1">
-                  <Badge variant="outline" className="font-normal text-muted-foreground">Profile: {profile.id}</Badge>
+                  <Badge variant="outline" className="font-normal text-muted-foreground">Hồ sơ: {profile.id}</Badge>
                   <Badge className={cn(
                     "font-semibold",
-                    profile.profileType === "Pro" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                    profile.profileType === "Pro" || profile.profileType === "Chuyên nghiệp" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                   )}>
-                    {profile.profileType} Plan
+                    Gói {profile.profileType}
                   </Badge>
                 </div>
               </div>
@@ -327,7 +338,7 @@ export default function ProfileDetailPage() {
                   <Activity className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Status</p>
+                  <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Trạng thái</p>
                   <p className="text-lg font-bold">{profile.status}</p>
                 </div>
               </div>
@@ -341,7 +352,7 @@ export default function ProfileDetailPage() {
                   <Building className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Company</p>
+                  <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Công ty</p>
                   <p className="text-lg font-bold truncate max-w-[120px]">{profile.companyName || "N/A"}</p>
                 </div>
               </div>
@@ -355,8 +366,8 @@ export default function ProfileDetailPage() {
                   <Calendar className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Member Since</p>
-                  <p className="text-lg font-bold">{new Date(profile.createdAt).toLocaleDateString()}</p>
+                  <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Thành viên từ</p>
+                  <p className="text-lg font-bold">{new Date(profile.createdAt).toLocaleDateString("vi-VN")}</p>
                 </div>
               </div>
             </CardContent>
@@ -370,8 +381,8 @@ export default function ProfileDetailPage() {
                   <Shield className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs opacity-80 font-bold uppercase tracking-wider">Platform Role</p>
-                  <p className="text-lg font-bold">Managed Entity</p>
+                  <p className="text-xs opacity-80 font-bold uppercase tracking-wider">Vai trò hệ thống</p>
+                  <p className="text-lg font-bold">Thực thể quản lý</p>
                 </div>
               </div>
             </CardContent>
@@ -385,17 +396,17 @@ export default function ProfileDetailPage() {
             <Card className="bg-card/50 border-border/50 shadow-sm overflow-hidden">
               <CardHeader className="bg-muted/40 border-b border-border/20 py-4">
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
-                  <Info className="h-4 w-4 text-primary" /> Profile Metadata
+                  <Info className="h-4 w-4 text-primary" /> Siêu dữ liệu hồ sơ
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6 space-y-5">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Biography</label>
-                  <p className="text-sm leading-relaxed text-foreground/80">{profile.bio || "No information provided."}</p>
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Tiểu sử</label>
+                  <p className="text-sm leading-relaxed text-foreground/80">{profile.bio || "Chưa có thông tin."}</p>
                 </div>
                 <div className="space-y-1.5 pt-2">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Last Updated</label>
-                  <p className="text-xs font-mono">{new Date(profile.updatedAt).toLocaleString()}</p>
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Cập nhật lần cuối</label>
+                  <p className="text-xs font-mono">{new Date(profile.updatedAt).toLocaleString("vi-VN")}</p>
                 </div>
               </CardContent>
             </Card>
@@ -403,14 +414,14 @@ export default function ProfileDetailPage() {
             <Card className="bg-card/50 border-border/50 shadow-sm overflow-hidden">
               <CardHeader className="bg-primary/5 border-b border-primary/10 py-4">
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-primary" /> Subscription Info
+                  <CreditCard className="h-4 w-4 text-primary" /> Thông tin gói đăng ký
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6">
                 {subscription ? (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/50">
-                      <span className="text-xs font-bold uppercase tracking-tight text-muted-foreground">Active Plan</span>
+                      <span className="text-xs font-bold uppercase tracking-tight text-muted-foreground">Gói đang hoạt động</span>
                       <Badge className="bg-primary text-primary-foreground font-bold">{subscription.plan}</Badge>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -419,14 +430,14 @@ export default function ProfileDetailPage() {
                         <p className="text-lg font-black">{subscription.quotaPostsPerMonth}</p>
                       </div>
                       <div className="p-3 rounded-xl border border-border/50 text-center">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Storage</p>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Dung lượng</p>
                         <p className="text-lg font-black">{subscription.quotaStorageGb}GB</p>
                       </div>
                     </div>
                     <div className="pt-2 text-center">
-                      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest mb-1">Valid Until</p>
+                      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest mb-1">Có hiệu lực đến</p>
                       <p className="text-xs font-mono font-bold">
-                        {subscription.endDate ? new Date(subscription.endDate).toLocaleDateString() : "Permanent"}
+                        {subscription.endDate ? new Date(subscription.endDate).toLocaleDateString("vi-VN") : "Vĩnh viễn"}
                       </p>
                     </div>
                   </div>
@@ -446,18 +457,18 @@ export default function ProfileDetailPage() {
                 <CardHeader className="bg-card/50 border-b border-border/20 px-6 py-4">
                   <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex flex-col gap-1">
-                      <CardTitle className="text-xl">Resources</CardTitle>
-                      <CardDescription>Managed objects associated with this profile entity.</CardDescription>
+                      <CardTitle className="text-xl">Tài nguyên</CardTitle>
+                      <CardDescription>Các thực thể được quản lý liên kết với hồ sơ này.</CardDescription>
                     </div>
                     <TabsList className="bg-background/80 border border-border/40 p-1 rounded-xl">
                       <TabsTrigger value="brands" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">
-                        <Building className="h-3.5 w-3.5 mr-2" /> Brands
+                        <Building className="h-3.5 w-3.5 mr-2" /> Thương hiệu
                       </TabsTrigger>
                       <TabsTrigger value="social" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">
-                        <Share2 className="h-3.5 w-3.5 mr-2" /> Social
+                        <Share2 className="h-3.5 w-3.5 mr-2" /> MXH
                       </TabsTrigger>
                       <TabsTrigger value="teams" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">
-                        <Users className="h-3.5 w-3.5 mr-2" /> Teams
+                        <Users className="h-3.5 w-3.5 mr-2" /> Đội ngũ
                       </TabsTrigger>
                     </TabsList>
                   </div>
@@ -472,8 +483,8 @@ export default function ProfileDetailPage() {
                             <Building className="h-8 w-8 text-muted-foreground/50" />
                           </div>
                           <div>
-                            <p className="text-lg font-bold">No Brands Linked</p>
-                            <p className="text-sm text-muted-foreground max-w-[280px] mx-auto">This profile hasn't initialized any business branding yet.</p>
+                            <p className="text-lg font-bold">Chưa có thương hiệu nào</p>
+                            <p className="text-sm text-muted-foreground max-w-[280px] mx-auto">Hồ sơ này chưa khởi tạo bất kỳ thông tin thương hiệu kinh doanh nào.</p>
                           </div>
                         </div>
                       ) : (
@@ -497,8 +508,8 @@ export default function ProfileDetailPage() {
                             <Share2 className="h-8 w-8 text-muted-foreground/50" />
                           </div>
                           <div>
-                            <p className="text-lg font-bold">No Social Connections</p>
-                            <p className="text-sm text-muted-foreground max-w-[280px] mx-auto">No external social media platforms are currently linked.</p>
+                            <p className="text-lg font-bold">Chưa có kết nối mạng xã hội</p>
+                            <p className="text-sm text-muted-foreground max-w-[280px] mx-auto">Hiện chưa có nền tảng mạng xã hội bên ngoài nào được liên kết.</p>
                           </div>
                         </div>
                       ) : (
@@ -522,8 +533,8 @@ export default function ProfileDetailPage() {
                             <Users className="h-8 w-8 text-muted-foreground/50" />
                           </div>
                           <div>
-                            <p className="text-lg font-bold">Solo Profile</p>
-                            <p className="text-sm text-muted-foreground max-w-[280px] mx-auto">This profile is not part of any workgroup or organizational teams.</p>
+                            <p className="text-lg font-bold">Hồ sơ cá nhân</p>
+                            <p className="text-sm text-muted-foreground max-w-[280px] mx-auto">Hồ sơ này không thuộc bất kỳ nhóm làm việc hoặc đội ngũ tổ chức nào.</p>
                           </div>
                         </div>
                       ) : (

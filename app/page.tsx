@@ -32,7 +32,7 @@ export default function Dashboard() {
         setUsers(pagedData?.data || []);
       } catch (error) {
         console.error("Failed to fetch users:", error);
-        toast.error("Failed to fetch users");
+        toast.error("Lấy danh sách người dùng thất bại");
       } finally {
         setLoading(false);
       }
@@ -48,7 +48,7 @@ export default function Dashboard() {
       <div className="flex items-center justify-center min-h-screen bg-background text-muted-foreground animate-pulse">
         <div className="flex flex-col items-center gap-4">
           <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-          <span className="text-sm font-medium">Initializing Dashboard...</span>
+          <span className="text-sm font-medium">Đang khởi tạo Dashboard...</span>
         </div>
       </div>
     );
@@ -59,7 +59,7 @@ export default function Dashboard() {
   const userColumns: ColumnDef<User>[] = [
     {
       accessorKey: "email",
-      header: "User",
+      header: "Người dùng",
       cell: ({ row }) => (
         <div className="flex items-center gap-3 py-1">
           <div className="h-8 w-8 rounded-full bg-primary/5 flex items-center justify-center text-primary font-bold text-xs">
@@ -74,23 +74,23 @@ export default function Dashboard() {
     },
     {
       accessorKey: "socialAccountsCount",
-      header: "Social Accounts",
+      header: "Tài khoản MXH",
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <div className="px-2 py-0.5 rounded-full bg-secondary/50 text-secondary-foreground text-xs font-semibold">
-            {row.original.socialAccountsCount} Accounts
+            {row.original.socialAccountsCount} Tài khoản
           </div>
         </div>
       )
     },
     {
       accessorKey: "createdAt",
-      header: "Joined Date",
+      header: "Ngày tham gia",
       cell: ({ row }) => (
         <span className="text-sm text-muted-foreground">
-          {new Date(row.getValue("createdAt")).toLocaleDateString("en-US", {
+          {new Date(row.getValue("createdAt")).toLocaleDateString("vi-VN", {
             year: 'numeric',
-            month: 'short',
+            month: 'long',
             day: 'numeric'
           })}
         </span>
@@ -98,7 +98,7 @@ export default function Dashboard() {
     },
     {
       id: "actions",
-      header: () => <div className="text-right">Actions</div>,
+      header: () => <div className="text-right">Hành động</div>,
       cell: ({ row }) => (
         <div className="text-right">
           <Button
@@ -107,7 +107,7 @@ export default function Dashboard() {
             className="group hover:bg-primary/5 hover:text-primary transition-all gap-1.5"
             onClick={() => router.push(`/user/${row.original.id}`)}
           >
-            Manage
+            Quản lý
             <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
           </Button>
         </div>
@@ -120,9 +120,9 @@ export default function Dashboard() {
       <div className="flex flex-col gap-8 pb-10">
         {/* Welcome Section */}
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Tổng quan</h1>
           <p className="text-muted-foreground font-light">
-            Welcome to the AISAM administration panel. Monitor and manage your platform's growth.
+            Chào mừng bạn đến với trang quản trị AISAM. Theo dõi và quản lý sự phát triển của hệ thống.
           </p>
         </div>
 
@@ -130,43 +130,43 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Total Users</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Tổng người dùng</CardTitle>
               <UsersIcon className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{users.length}</div>
-              <p className="text-xs text-muted-foreground mt-1">+12% from last month</p>
+              <p className="text-xs text-muted-foreground mt-1">+12% so với tháng trước</p>
             </CardContent>
           </Card>
           <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Active Users</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Người dùng tích cực</CardTitle>
               <UserCheck className="h-4 w-4 text-success" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{Math.floor(users.length * 0.85)}</div>
-              <p className="text-xs text-muted-foreground mt-1">High retention rate</p>
+              <p className="text-xs text-muted-foreground mt-1">Tỷ lệ giữ chân cao</p>
             </CardContent>
           </Card>
           <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Churn Rate</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Tỷ lệ rời bỏ</CardTitle>
               <UserMinus className="h-4 w-4 text-error" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">2.4%</div>
-              <p className="text-xs text-muted-foreground mt-1">-0.5% improvement</p>
+              <p className="text-xs text-muted-foreground mt-1">Cải thiện -0.5%</p>
             </CardContent>
           </Card>
           <Card className="bg-primary shadow-lg shadow-primary/20 border-none text-primary-foreground overflow-hidden relative">
             <div className="absolute -right-4 -top-4 h-24 w-24 bg-white/10 rounded-full blur-2xl" />
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium opacity-80 text-white uppercase tracking-wider">System Status</CardTitle>
+              <CardTitle className="text-sm font-medium opacity-80 text-white uppercase tracking-wider">Trạng thái hệ thống</CardTitle>
               <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">Healthy</div>
-              <p className="text-xs opacity-70 text-white mt-1">All systems operational</p>
+              <div className="text-2xl font-bold text-white">Ổn định</div>
+              <p className="text-xs opacity-70 text-white mt-1">Hệ thống đang hoạt động bình thường</p>
             </CardContent>
           </Card>
         </div>
@@ -176,13 +176,13 @@ export default function Dashboard() {
           <CardHeader className="bg-card/50 border-b border-border/30 px-6 py-5">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-xl">User Directory</CardTitle>
+                <CardTitle className="text-xl">Danh mục người dùng</CardTitle>
                 <CardDescription className="mt-1">
-                  A comprehensive list of all AISAM users and their account statuses.
+                  Danh sách đầy đủ tất cả người dùng AISAM và trạng thái tài khoản.
                 </CardDescription>
               </div>
-              <Button size="sm" variant="outline" onClick={() => toast.info("Exporting data...")}>
-                Export CSV
+              <Button size="sm" variant="outline" onClick={() => toast.info("Đang xuất dữ liệu...")}>
+                Xuất CSV
               </Button>
             </div>
           </CardHeader>

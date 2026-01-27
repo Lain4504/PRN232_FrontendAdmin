@@ -13,8 +13,8 @@ export default function SettingsPage() {
         <DashboardLayout>
             <div className="flex flex-col gap-8 max-w-4xl mx-auto">
                 <div className="flex flex-col gap-2">
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Global Settings</h1>
-                    <p className="text-muted-foreground">Configure the AISAM administration panel behavior and system preferences.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Cài đặt hệ thống</h1>
+                    <p className="text-muted-foreground">Cấu hình hành vi bảng quản trị AISAM và các tùy chọn hệ thống.</p>
                 </div>
 
                 <div className="flex flex-col gap-6">
@@ -25,30 +25,30 @@ export default function SettingsPage() {
                                     <Palette className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg">Appearance & UI</CardTitle>
-                                    <CardDescription>Personalize your dashboard experience.</CardDescription>
+                                    <CardTitle className="text-lg">Giao diện & UI</CardTitle>
+                                    <CardDescription>Cá nhân hóa trải nghiệm trang quản trị của bạn.</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent className="p-6 space-y-6">
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
-                                    <Label className="text-sm font-bold">Compact Sidebar</Label>
-                                    <p className="text-xs text-muted-foreground">Minimize the sidebar automatically on load.</p>
+                                    <Label className="text-sm font-bold">Thanh bên thu gọn</Label>
+                                    <p className="text-xs text-muted-foreground">Tự động thu gọn thanh bên khi tải trang.</p>
                                 </div>
                                 <Switch />
                             </div>
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
-                                    <Label className="text-sm font-bold">Dark Mode Sync</Label>
-                                    <p className="text-xs text-muted-foreground">Follow system color preference for the UI.</p>
+                                    <Label className="text-sm font-bold">Đồng bộ chế độ tối</Label>
+                                    <p className="text-xs text-muted-foreground">Mặc định theo cài đặt màu của hệ thống.</p>
                                 </div>
                                 <Switch defaultChecked />
                             </div>
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
-                                    <Label className="text-sm font-bold">Reduced Motion</Label>
-                                    <p className="text-xs text-muted-foreground">Minimize high-intensity animations across the dashboard.</p>
+                                    <Label className="text-sm font-bold">Giảm hiệu ứng chuyển động</Label>
+                                    <p className="text-xs text-muted-foreground">Giảm thiểu các hiệu ứng chuyển động mạnh trên trang quản trị.</p>
                                 </div>
                                 <Switch />
                             </div>
@@ -62,23 +62,23 @@ export default function SettingsPage() {
                                     <Bell className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg">System Notifications</CardTitle>
-                                    <CardDescription>Configure how you receive critical system alerts.</CardDescription>
+                                    <CardTitle className="text-lg">Thông báo hệ thống</CardTitle>
+                                    <CardDescription>Cấu hình cách bạn nhận các cảnh báo hệ thống quan trọng.</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent className="p-6 space-y-6">
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
-                                    <Label className="text-sm font-bold">Push Notifications</Label>
-                                    <p className="text-xs text-muted-foreground">Receive browser notifications for system events.</p>
+                                    <Label className="text-sm font-bold">Thông báo đẩy</Label>
+                                    <p className="text-xs text-muted-foreground">Nhận thông báo trình duyệt cho các sự kiện hệ thống.</p>
                                 </div>
                                 <Switch defaultChecked />
                             </div>
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
-                                    <Label className="text-sm font-bold">Email Digest</Label>
-                                    <p className="text-xs text-muted-foreground">Receive a weekly summary of platform activity.</p>
+                                    <Label className="text-sm font-bold">Bản tin Email</Label>
+                                    <p className="text-xs text-muted-foreground">Nhận bản tóm tắt hàng tuần về hoạt động của nền tảng.</p>
                                 </div>
                                 <Switch defaultChecked />
                             </div>
@@ -92,22 +92,22 @@ export default function SettingsPage() {
                                     <Globe className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-lg">Regional & Data</CardTitle>
-                                    <CardDescription>Manage your data and localization preferences.</CardDescription>
+                                    <CardTitle className="text-lg">Khu vực & Dữ liệu</CardTitle>
+                                    <CardDescription>Quản lý dữ liệu và các tùy chọn bản địa hóa của bạn.</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent className="p-6 space-y-6">
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
-                                    <Label className="text-sm font-bold">Auto-Translation</Label>
-                                    <p className="text-xs text-muted-foreground">Translate user content into your primary language.</p>
+                                    <Label className="text-sm font-bold">Tự động dịch</Label>
+                                    <p className="text-xs text-muted-foreground">Dịch nội dung người dùng sang ngôn ngữ chính của bạn.</p>
                                 </div>
                                 <Switch />
                             </div>
                             <div className="pt-4 flex justify-end gap-3">
-                                <Button variant="outline" className="rounded-xl font-bold">Reset to Default</Button>
-                                <Button className="rounded-xl font-bold shadow-lg shadow-primary/20 px-8">Save Changes</Button>
+                                <Button variant="outline" className="rounded-xl font-bold">Đặt lại mặc định</Button>
+                                <Button className="rounded-xl font-bold shadow-lg shadow-primary/20 px-8">Lưu thay đổi</Button>
                             </div>
                         </CardContent>
                     </Card>
