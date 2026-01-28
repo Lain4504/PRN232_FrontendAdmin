@@ -16,17 +16,16 @@ import { ExternalLink, Copy, CheckCircle2, XCircle, Clock, RotateCcw, ArrowRight
 import { cn } from "@/lib/utils";
 
 // Helper function to format currency
-const formatCurrency = (amount: number, currency: string = "USD") => {
-  const mappedCurrency = currency.toUpperCase() === "VND" ? "VND" : "USD";
+const formatCurrency = (amount: number, currency: string = "VND") => {
+  const mappedCurrency = currency.toUpperCase();
   try {
-    return new Intl.NumberFormat(mappedCurrency === "VND" ? "vi-VN" : "en-US", {
+    return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: mappedCurrency,
       minimumFractionDigits: mappedCurrency === "VND" ? 0 : 2,
-      maximumFractionDigits: mappedCurrency === "VND" ? 0 : 2,
     }).format(amount);
   } catch {
-    return `${amount} ${mappedCurrency}`;
+    return `${amount.toLocaleString("vi-VN")} ${mappedCurrency}`;
   }
 };
 
