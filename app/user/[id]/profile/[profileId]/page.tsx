@@ -331,19 +331,21 @@ export default function ProfileDetailPage() {
 
         {/* Quick Info Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-card/50 border-border/50">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                  <Activity className="h-5 w-5" />
+          {!(profile.profileType === "Miễn phí" && profile.status === "Đang chờ") && (
+            <Card className="bg-card/50 border-border/50">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                    <Activity className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Trạng thái</p>
+                    <p className="text-lg font-bold">{profile.status}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Trạng thái</p>
-                  <p className="text-lg font-bold">{profile.status}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           <Card className="bg-card/50 border-border/50">
             <CardContent className="pt-6">

@@ -99,7 +99,11 @@ export default function UserDetailPage() {
       accessorKey: "status",
       header: "Trạng thái",
       cell: ({ row }) => {
-        const status = row.original.status;
+        const { status, profileType } = row.original;
+        // Hide "Pending" status for Free profiles as requested
+        if (profileType === "Miễn phí" && status === "Đang chờ") {
+          return null;
+        }
         return (
           <Badge
             className={cn(
